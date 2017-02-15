@@ -81,7 +81,7 @@ int main(int argc, char **argv)
 
     char host_name[1024];
     gethostname(host_name, 1024);
-    printf("host_name: %s\n", host_name);
+    // printf("host_name: %s\n", host_name);
 
     // int portno = atoi(port);
     // struct sockaddr_in sa;
@@ -195,18 +195,13 @@ int main(int argc, char **argv)
                             cse4589_print_and_log("[%s:SUCCESS]\n", "AUTHOR");
                             cse4589_print_and_log("AUTHOR:%s\n", msg);
                             cse4589_print_and_log("[%s:END]\n", "AUTHOR");
-                            // write(1, msg, status);
                         } else if(strcmp(token, "IP") == 0) {
                         	// IP
-                        	status = sprintf(msg, "IP:%s\n", ip_addr);
-                        	write(1, msg, status);
                             cse4589_print_and_log("[%s:SUCCESS]\n", "IP");
                             cse4589_print_and_log("IP:%s\n", ip_addr);
                             cse4589_print_and_log("[%s:END]\n", "IP");
                         } else if(strcmp(token, "PORT") == 0) {
                         	// PORT
-                    		status = sprintf(msg, "PORT:%d\n", port_int);
-						    write(1, msg, status);
                             cse4589_print_and_log("[%s:SUCCESS]\n", "PORT");
                             cse4589_print_and_log("PORT:%d\n", port_int);
                             cse4589_print_and_log("[%s:END]\n", "PORT");
@@ -250,11 +245,11 @@ int main(int argc, char **argv)
                             } else {
                                 perror("recv");
                             }
-                            printf("cleared %d\n", i);
+                            // printf("cleared %d\n", i);
                             close(i);
                             FD_CLR(i, &master);
                         } else {
-                            printf("received from client: %s\n", buf);
+                            // printf("received from client: %s\n", buf);
                             int k = 2;
                             char client_payload[BUFSIZE];
                             // Check command received from client == BROADCAST
@@ -266,14 +261,14 @@ int main(int argc, char **argv)
 
                             // BROADCAST
                             if(strncmp("br", buf, 2) == 0) {
-                                printf("brconfirmed\n");
+                                // printf("brconfirmed\n");
                                 for(int j = 1; j <= fd_max; j++) {
                                     if(FD_ISSET(j, &master)) {
                                         if(j != fd) {
                                             if(send(j, client_payload, nbytes-2, 0) == -1) {
                                                 perror("send");
                                             }
-                                            printf("sent %d bytes to fd=%d: %s\n", nbytes-2, j, client_payload);
+                                            // printf("sent %d bytes to fd=%d: %s\n", nbytes-2, j, client_payload);
                                             
                                         } 
                                     }
@@ -285,14 +280,14 @@ int main(int argc, char **argv)
                                 char *client_ip = strtok(payload, " ");
                                 char *message = strtok(NULL, "");
                                 int len = strlen(message);                                
-                                printf("ip: %s\nmessage: %s\n", client_ip, message);
+                                // printf("ip: %s\nmessage: %s\n", client_ip, message);
                                 int recvr_fd = vec_get_fd(&clients, client_ip);
                                 printf("recvr_fd: %d", recvr_fd);
                                 if(recvr_fd >= 0) {
                                     if(send(recvr_fd, message, strlen(message), 0) == -1) {
                                         perror("send");
                                     }
-                                    printf("sent %d bytes to fd=%d: %s\n", len, recvr_fd, message); 
+                                    // printf("sent %d bytes to fd=%d: %s\n", len, recvr_fd, message); 
                                 }
                             } 
                             // After login, receive and assign client listening port
@@ -313,7 +308,7 @@ int main(int argc, char **argv)
                                 // for localhost testing
                                 char ip_localhost[INET_ADDRSTRLEN] = "127.0.1.1";
                                 strncpy(listing->hostname, host, sizeof(listing->hostname));
-                                strncpy(listing->address, ip_localhost, sizeof(listing->address));
+                                strncpy(listing->address, ip, sizeof(listing->address));
                                 sprintf(portstr, "%s", client_payload);
                                 listing->port = atoi(portstr);
                                 listing->fd = new_fd;
@@ -342,7 +337,7 @@ int main(int argc, char **argv)
                                 if(client_fd == -1) {
                                     break;
                                 }
-                                printf("refresh fd: %d\n", client_fd);
+                                // printf("refresh fd: %d\n", client_fd);
                                 char *head = "li";
                                 char client_list[1024] = "";
                                 char payload[1024] = "";
@@ -365,7 +360,7 @@ int main(int argc, char **argv)
                             }
 
                             if(strncmp("bl", buf, 2) == 0) {
-                                printf("bl: %s\n", client_payload);
+                                // printf("bl: %s\n", client_payload);
                                 char *client_ip = strtok(client_payload, " ");
                                 char *block_ip = strtok(NULL, "");
 
@@ -375,7 +370,7 @@ int main(int argc, char **argv)
                             }
 
                             if(strncmp("ub", buf, 2) == 0) {
-                                printf("ub: %s\n", client_payload);
+                                // printf("ub: %s\n", client_payload);
                                 char *client_ip = strtok(client_payload, " ");
                                 char *unblock_ip = strtok(NULL, "");
 
@@ -441,7 +436,7 @@ int main(int argc, char **argv)
                         	buf[0] = '\0';
                         	token = buf;
                         }
-                        printf("token = %s\n",  token);
+                        // printf("token = %s\n",  token);
 
                         if(strcmp(token, "AUTHOR") == 0) {
                             // AUTHOR
@@ -449,18 +444,15 @@ int main(int argc, char **argv)
                             cse4589_print_and_log("[%s:SUCCESS]\n", "AUTHOR");
                             cse4589_print_and_log("AUTHOR:%s\n", msg);
                             cse4589_print_and_log("[%s:END]\n", "AUTHOR");
-                            // write(1, msg, status);
                         } else if(strcmp(token, "IP") == 0) {
                         	// IP
-                        	status = sprintf(msg, "IP:%s\n", ip_addr);
-                        	write(1, msg, status);
+                        	// status = sprintf(msg, "IP:%s\n", ip_addr);
                             cse4589_print_and_log("[%s:SUCCESS]\n", "IP");
                             cse4589_print_and_log("IP:%s\n", ip_addr);
                             cse4589_print_and_log("[%s:END]\n", "IP");
                         } else if(strcmp(token, "PORT") == 0) {
                         	// PORT
-                    		status = sprintf(msg, "PORT:%d\n", port_int);
-						    write(1, msg, status);
+                    		// status = sprintf(msg, "PORT:%d\n", port_int);
                             cse4589_print_and_log("[%s:SUCCESS]\n", "PORT");
                             cse4589_print_and_log("PORT:%d\n", port_int);
                             cse4589_print_and_log("[%s:END]\n", "PORT");
