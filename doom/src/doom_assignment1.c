@@ -231,7 +231,7 @@ int main(int argc, char **argv)
                         } else {
                             FD_SET(new_fd, &master);
                             if(new_fd > fd_max) fd_max = new_fd;
-                            printf("selectserver: new connection fd: %d\n", new_fd);
+                            // printf("selectserver: new connection fd: %d\n", new_fd);
                         }
                     } else {
                         // handle client messages
@@ -486,14 +486,14 @@ int main(int argc, char **argv)
 
                             FD_SET(server_fd, &master);
                             if(server_fd > fd_max) fd_max = server_fd;
-                            printf("selectserver: new connection fd: %d\n", server_fd);
+                            // printf("selectserver: new connection fd: %d\n", server_fd);
 
                             // Send server client listening port
                             char *head = "lo";
                             char port_str[32];
                             memset(port_str, '\0', sizeof(port_str));
                             snprintf(port_str, sizeof(port_str), "%s%d", head, port_int);
-                            printf("sending port info: %s\n", port_str);
+                            // printf("sending port info: %s\n", port_str);
                             if(send(server_fd, port_str, strlen(port_str), 0) == -1) {
                                 perror("send");
                             }
@@ -609,19 +609,19 @@ int main(int argc, char **argv)
                             } else {
                                 perror("recv");
                             }
-                            printf("cleared %d", i);
+                            // printf("cleared %d", i);
                             close(i);
                             FD_CLR(i, &master);
                         } else {
                             int len = strlen(buf);
-                            printf("recvd %d bytes: %s\n", nbytes, buf);
+                            // printf("recvd %d bytes: %s\n", nbytes, buf);
 
                             char *head = strtok(buf, " ");
                             char *message = strtok(NULL, "");
-                            printf("head: %s\n", head);
+                            // printf("head: %s\n", head);
                             // Received list of clients
                             if(strcmp(head, "li") == 0) {
-                                printf("message: %s\n", message);
+                                // printf("message: %s\n", message);
                                 memset(clients, '\0', sizeof(clients));
                                 strncpy(clients, message, strlen(message));
                             }

@@ -252,7 +252,7 @@ void vec_clients(Vector *vec, char *str_array) {
 			j++;
 		}
 	}
-	printf("strarray: %s\n", str_array);
+	// printf("strarray: %s\n", str_array);
 }
 
 
