@@ -207,17 +207,26 @@ int main(int argc, char **argv)
                             cse4589_print_and_log("[%s:END]\n", "PORT");
                         } else if(strcmp(token, "LIST") == 0) {
                         	// LIST
+                        	cse4589_print_and_log("[%s:SUCCESS]\n", "LIST");
                             vec_print_list(&clients);
+                            cse4589_print_and_log("[%s:END]\n", "LIST");
+
                             // for(int i = 0; i < clients.size; i++) {
                             //     printf("%d %s %s %s", i+1, clients.data[i].hostname, clients.data[i].address, clients.data[i].port);
                             // }
 
 
                         } else if(strcmp(token, "STATISTICS") == 0) {
+                        	cse4589_print_and_log("[%s:SUCCESS]\n", "STATISTICS");
                             vec_print_statistic(&clients);
+                            cse4589_print_and_log("[%s:END]\n", "STATISTICS");
                         } else if(strcmp(token, "BLOCKED") == 0) {
                             char *client_ip = strtok(NULL, "");
+
+                        	cse4589_print_and_log("[%s:SUCCESS]\n", "BLOCKED");
                             vec_print_blocked(&clients, client_ip);
+                            cse4589_print_and_log("[%s:END]\n", "BLOCKED");
+
                         }
                                                    
 
@@ -251,7 +260,7 @@ int main(int argc, char **argv)
                         } else {
                             // printf("received from client: %s\n", buf);
                             int k = 2;
-                            char client_payload[BUFSIZE];
+                            char client_payload[BUFSIZE] = "";
                             // Check command received from client == BROADCAST
                             // printf("**payload: %s\n", client_payload);
                             strncpy(client_payload, &(buf[2]), nbytes-2);
@@ -262,13 +271,17 @@ int main(int argc, char **argv)
                             // BROADCAST
                             if(strncmp("br", buf, 2) == 0) {
                                 // printf("brconfirmed\n");
+                                char *client_ip = strtok(client_payload, " ");
+                                char *msg = strtok(NULL, "");
+                             	cse4589_print_and_log("msg from %s to: %s\n[msg]:%s\n", client_ip, "255.255.255.255", msg);
                                 for(int j = 1; j <= fd_max; j++) {
                                     if(FD_ISSET(j, &master)) {
                                         if(j != fd) {
-                                            if(send(j, client_payload, nbytes-2, 0) == -1) {
+                                            if(send(j, msg, sizeof(msg), 0) == -1) {
                                                 perror("send");
+                                            } else {
+                                            	
                                             }
-                                            // printf("sent %d bytes to fd=%d: %s\n", nbytes-2, j, client_payload);
                                             
                                         } 
                                     }
@@ -458,12 +471,19 @@ int main(int argc, char **argv)
                             cse4589_print_and_log("[%s:END]\n", "PORT");
                         } else if(strcmp(token, "LIST") == 0) {
                         	// LIST
-                            printf("LIST: \n%s", clients);
+                        	cse4589_print_and_log("[%s:SUCCESS]\n", "LIST");
+                            printf("%s", clients);
+                            cse4589_print_and_log("[%s:END]\n", "LIST");
+
                         }
 
                         if(strcmp(token, "LOGIN") == 0 && logged_in == false) {
                             // LOGIN <server-ip> <server-port>
                             // #TODO CHANGE THIS TO WORK FOR IPV6 AS WELL
+                            cse4589_print_and_log("[%s:SUCCESS]\n", "LOGIN");
+							cse4589_print_and_log("[%s:END]\n", "LOGIN");
+
+
                             char *server_ip  = strtok(NULL, " ");
                             char *server_port = strtok(NULL, " ");
                             int server_port_int = atoi(server_port);
@@ -503,6 +523,10 @@ int main(int argc, char **argv)
 
                         } else if(strcmp(token, "REFRESH") == 0) {
                             // REFRESH
+                            cse4589_print_and_log("[%s:SUCCESS]\n", "REFRESH");
+							cse4589_print_and_log("[%s:END]\n", "REFRESH");
+
+
                             char payload[256];
                             char *head = "re";
                             snprintf(payload, sizeof(payload), "%s%s", head, ip_addr);
@@ -515,6 +539,10 @@ int main(int argc, char **argv)
                             // SEND <client-ip> <msg>
                             // char *client_ip = strtok(NULL, " ");
                             // char *msg = strtok(NULL, " ");
+                            cse4589_print_and_log("[%s:SUCCESS]\n", "SEND");
+							cse4589_print_and_log("[%s:END]\n", "SEND");
+
+
                             char payload[256];
                             char *head = "se";
                             char *message = strtok(NULL, "");
@@ -532,7 +560,13 @@ int main(int argc, char **argv)
                             char payload[256];
                             char *head = "br";
                             char *message = strtok(NULL, "");
-                            snprintf(payload, sizeof(payload), "%s%s", head, message);
+
+                            cse4589_print_and_log("[%s:SUCCESS]\n", "BROADCAST");
+							// cse4589_print_and_log(“BROADCAST:%s\n”, ip_addr);
+							cse4589_print_and_log("%s\n", message);
+							cse4589_print_and_log("[%s:END]\n", "BROADCAST");
+
+                            snprintf(payload, sizeof(payload), "%s%s %s", head, ip_addr, message);
                             if(server_fd != -1) {
                                 // Send to server
                                 if(send(server_fd, payload, strlen(payload), 0) == -1) {
@@ -544,6 +578,10 @@ int main(int argc, char **argv)
 
                         } else if(strcmp(token, "BLOCK") == 0) {
                             // BLOCK <client-ip>
+                            cse4589_print_and_log("[%s:SUCCESS]\n", "BLOCK");
+							cse4589_print_and_log("[%s:END]\n", "BLOCK");
+
+
                             char *client_ip = strtok(NULL, " ");
                             char payload[256] = "";
                             char *head = "bl";
@@ -555,6 +593,9 @@ int main(int argc, char **argv)
 
                         } else if(strcmp(token, "UNBLOCK") == 0) {
                             // UNBLOCK <client-ip>
+	                        cse4589_print_and_log("[%s:SUCCESS]\n", "UNBLOCK");
+							cse4589_print_and_log("[%s:END]\n", "UNBLOCK");
+
                             char *client_ip = strtok(NULL, " ");
                             char payload[256] = "";
                             char *head = "ub";
@@ -566,7 +607,9 @@ int main(int argc, char **argv)
 
 
                         } else if(strcmp(token, "LOGOUT") == 0) {
-                            // LOGOUT
+                            cse4589_print_and_log("[%s:SUCCESS]\n", "LOGOUT");
+							cse4589_print_and_log("[%s:END]\n", "LOGOUT");
+                            
                             char payload[256];
                             char *head = "lg";
                             snprintf(payload, sizeof(payload), "%s%s", head, ip_addr);
@@ -586,6 +629,10 @@ int main(int argc, char **argv)
                         } else if(strcmp(token, "EXIT") == 0) {
                             // EXIT
                             // TODO: send signal to server
+                            cse4589_print_and_log("[%s:SUCCESS]\n", "EXIT");
+							cse4589_print_and_log("[%s:END]\n", "EXIT");
+
+
                             char payload[256];
                             char *head = "ex";
                             snprintf(payload, sizeof(payload), "%s%s", head, ip_addr);
@@ -595,6 +642,10 @@ int main(int argc, char **argv)
                             exit(0);
                         } else if(strcmp(token, "SENDFILE") == 0) {
                             // SENDFILE <client-ip> <file>
+                            cse4589_print_and_log("[%s:SUCCESS]\n", "SENDFILE");
+							cse4589_print_and_log("[%s:END]\n", "SENDFILE");
+
+
                             char *client_ip = strtok(NULL, " ");
                             char *file = strtok(NULL, " ");
                         }
@@ -624,6 +675,13 @@ int main(int argc, char **argv)
                                 // printf("message: %s\n", message);
                                 memset(clients, '\0', sizeof(clients));
                                 strncpy(clients, message, strlen(message));
+                                printf("%s", clients);
+                            }
+
+                            if(strcmp(head, "se") == 0) {
+	                            cse4589_print_and_log("[%s:SUCCESS]\n", "RECEIVED");
+                                cse4589_print_and_log("%s\n", message);
+								cse4589_print_and_log("[%s:END]\n", "RECEIVED");
                             }
                         }
 
