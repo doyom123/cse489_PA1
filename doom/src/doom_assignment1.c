@@ -191,7 +191,7 @@ int main(int argc, char **argv)
                         // SHELL Commands
                         if(strcmp(token, "AUTHOR") == 0) {
                             // AUTHOR
-                            status = sprintf(msg, "I, %s, have read and understood the course academic integrity policy.\n", "doom");
+                            status = sprintf(msg, "I, %s, have read and understood the course academic integrity policy.", "doom");
                             cse4589_print_and_log("[%s:SUCCESS]\n", "AUTHOR");
                             cse4589_print_and_log("AUTHOR:%s\n", msg);
                             cse4589_print_and_log("[%s:END]\n", "AUTHOR");
@@ -207,25 +207,19 @@ int main(int argc, char **argv)
                             cse4589_print_and_log("[%s:END]\n", "PORT");
                         } else if(strcmp(token, "LIST") == 0) {
                         	// LIST
-                        	cse4589_print_and_log("[%s:SUCCESS]\n", "LIST");
+                        	// cse4589_print_and_log("[%s:SUCCESS]\n", "LIST");
                             vec_print_list(&clients);
-                            cse4589_print_and_log("[%s:END]\n", "LIST");
-
-                            // for(int i = 0; i < clients.size; i++) {
-                            //     printf("%d %s %s %s", i+1, clients.data[i].hostname, clients.data[i].address, clients.data[i].port);
-                            // }
-
+                            // cse4589_print_and_log("[%s:END]\n", "LIST");
 
                         } else if(strcmp(token, "STATISTICS") == 0) {
-                        	cse4589_print_and_log("[%s:SUCCESS]\n", "STATISTICS");
+                        	// cse4589_print_and_log("[%s:SUCCESS]\n", "STATISTICS");
                             vec_print_statistic(&clients);
-                            cse4589_print_and_log("[%s:END]\n", "STATISTICS");
+                            // cse4589_print_and_log("[%s:END]\n", "STATISTICS");
                         } else if(strcmp(token, "BLOCKED") == 0) {
                             char *client_ip = strtok(NULL, "");
-
-                        	cse4589_print_and_log("[%s:SUCCESS]\n", "BLOCKED");
+                        	// cse4589_print_and_log("[%s:SUCCESS]\n", "BLOCKED");
                             vec_print_blocked(&clients, client_ip);
-                            cse4589_print_and_log("[%s:END]\n", "BLOCKED");
+                            // cse4589_print_and_log("[%s:END]\n", "BLOCKED");
 
                         }
                                                    
@@ -453,7 +447,7 @@ int main(int argc, char **argv)
 
                         if(strcmp(token, "AUTHOR") == 0) {
                             // AUTHOR
-                            status = sprintf(msg, "I, %s, have read and understood the course academic integrity policy.\n", "doom");
+                            status = sprintf(msg, "I, %s, have read and understood the course academic integrity policy.", "doom");
                             cse4589_print_and_log("[%s:SUCCESS]\n", "AUTHOR");
                             cse4589_print_and_log("AUTHOR:%s\n", msg);
                             cse4589_print_and_log("[%s:END]\n", "AUTHOR");
@@ -472,7 +466,7 @@ int main(int argc, char **argv)
                         } else if(strcmp(token, "LIST") == 0) {
                         	// LIST
                         	cse4589_print_and_log("[%s:SUCCESS]\n", "LIST");
-                            printf("%s", clients);
+                            cse4589_print_and_log("%s", clients);
                             cse4589_print_and_log("[%s:END]\n", "LIST");
 
                         }

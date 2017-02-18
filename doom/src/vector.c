@@ -3,6 +3,8 @@
 #include <string.h>
 #include <netinet/in.h>
 #include "vector.h"
+#include "logger.h"
+#include "helper.h"
 
 // VectorBlocked Functions
 void vecstr_init(VectorStr *vs) {
@@ -206,27 +208,40 @@ void vec_print(Vector *vec, char *address) {
 
 void vec_print_list(Vector *vec) {
 	int j = 0;
+	cse4589_print_and_log("[%s:SUCCESS]\n", "LIST");
 	for(int i = 0; i < vec->size; i++) {
 		Listing *curr = vec->data[i];
 		// printf("***host: %s, addr: %s port: %d fd: %d\n", vec->data[i]->hostname, vec->data[i]->address, vec->data[i]->port, vec->data[i]->fd);
 		if(strcmp(vec->data[i]->status, "logged-in") == 0) {
-			printf("%-5d%-35s%-20s%-8d\n", j+1, curr->hostname, curr->address, curr->port);
+			cse4589_print_and_log("%-5d%-35s%-20s%-8d\n", j+1, curr->hostname, curr->address, curr->port);
 			// printf("address: %s  port: %s\n", curr.address, curr.port);
 			j++;
 		}
 
 	}
+    cse4589_print_and_log("[%s:END]\n", "LIST");
+
 }
 
 void vec_print_statistic(Vector *vec) {
+	cse4589_print_and_log("[%s:SUCCESS]\n", "STATISTICS");
 	for(int i = 0; i < vec->size; i++) {
 		Listing *curr = vec->data[i];
-		printf("%-5d%-35s%-8d%-8d%-8s\n", i+1, curr->hostname, curr->msg_sent, curr->msg_recv, curr->status);
+		cse4589_print_and_log("%-5d%-35s%-8d%-8d%-8s\n", i+1, curr->hostname, curr->msg_sent, curr->msg_recv, curr->status);
 	}
+    cse4589_print_and_log("[%s:END]\n", "STATISTICS");
 }
 
 void vec_print_blocked(Vector *vec, char *address) {
-	VectorStr vs;
+	// Check if valid IP
+	if(!isValidIP(address)) {
+		cse4589_print_and_log("[%s:ERROR]\n", "BLOCKED");
+	    cse4589_print_and_log("[%s:END]\n", "BLOCKED");
+		return;	
+	}
+
+	VectorStr vs = { .size = -1 };
+	
 	for(int i = 0; i < vec->size; i++) {
 		Listing *curr = vec->data[i];
 		printf("cad: %s\naddr: %s\n", curr->address, address);
@@ -235,10 +250,17 @@ void vec_print_blocked(Vector *vec, char *address) {
 			break;			
 		}
 	}
-
-	for(int i = 0; i < vs.size; i++) {
-		printf("vs: %s\n", vs.data[i]);
+	if(vs.size == -1) {
+		cse4589_print_and_log("[%s:ERROR]\n", "BLOCKED");
+	} else {
+		cse4589_print_and_log("[%s:SUCCESS]\n", "BLOCKED");
+		for(int i = 0; i < vs.size; i++) {
+			Listing *curr = vec->data[i];
+			// cse4589_print_and_log("%-5d%-35s%-20s%-8d\n", j+1, curr->hostname, curr->address, curr->port);
+			// printf("vs: %s\n", vs.data[i]);
+		}
 	}
+    cse4589_print_and_log("[%s:END]\n", "BLOCKED");
 }
 
 void vec_clients(Vector *vec, char *str_array) {

@@ -12,6 +12,7 @@ typedef int bool;
 #define PORTSIZE 65535
 
 bool isValidInt(const char *input);
+bool isValidIP(const char *address);
 void printStats();
 char** splitString();
 // char* ip_string(const struct sockaddr *sa,  char *dst, size_t size);

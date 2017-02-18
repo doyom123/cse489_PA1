@@ -14,6 +14,15 @@ isValidInt(const char *input) {
 	return true;
 }
 
+bool
+isValidIP(const char *address) {
+	struct sockaddr_in sa;
+	if(inet_pton(AF_INET, address, &(sa.sin_addr)) == -1) {
+		return false;
+	}
+	return true;	
+}
+
 // char* ip_string(const struct sockaddr *sa,  char *dst, size_t size) {
 // 	if(sa->sa_family == AF_INET) {
 // 		inet_ntop(AF_INET, &(((struct sockaddr_in *)sa)->sin_addr),
