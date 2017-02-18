@@ -1,7 +1,0 @@
-[LOGIN:SUCCESS]
-[LOGIN:END]
-[LIST:SUCCESS]
-1    localhost                          127.0.1.1           1111    
-[LIST:END]
-msg from:127.0.1.1
-[msg]:another one to watch over

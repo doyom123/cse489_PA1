@@ -1,5 +1,4 @@
 [LOGIN:SUCCESS]
 [LOGIN:END]
-[BROADCAST:SUCCESS]
-another one to watch over
-[BROADCAST:END]
+[SEND:ERROR]
+[SEND:END]

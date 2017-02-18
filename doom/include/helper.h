@@ -13,6 +13,7 @@ typedef int bool;
 
 bool isValidInt(const char *input);
 bool isValidIP(const char *address);
+bool inClients(char *clients, const char *address);
 void printStats();
 char** splitString();
 // char* ip_string(const struct sockaddr *sa,  char *dst, size_t size);

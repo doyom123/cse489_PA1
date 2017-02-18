@@ -290,14 +290,19 @@ int main(int argc, char **argv)
                             // Check command received from client == SEND
                             // #TODO: NOT SENDING
                             if(strncmp("se", buf, 2) == 0) {
-                                char *client_ip = strtok(payload, " ");
+                                char *client_ip = strtok(client_payload, " ");
+                                char *recvr_ip = strtok(NULL, " ");
                                 char *message = strtok(NULL, "");
-                                int len = strlen(message);                                
+                                int len = strlen(message);                   
+                                char *head = "ms";             
                                 // printf("ip: %s\nmessage: %s\n", client_ip, message);
-                                int recvr_fd = vec_get_fd(&clients, client_ip);
+                                int recvr_fd = vec_get_fd(&clients, recvr_ip);
+                                cse4589_print_and_log("msg from %s to: %s\n[msg]:%s\n", client_ip, recvr_ip, message);
                                 printf("recvr_fd: %d", recvr_fd);
+                                char to_client[512] = "";
+                                snprintf(to_client, sizeof(to_client), "%s%s %s", head, client_ip, message);
                                 if(recvr_fd >= 0) {
-                                    if(send(recvr_fd, message, strlen(message), 0) == -1) {
+                                    if(send(recvr_fd, to_client, strlen(to_client), 0) == -1) {
                                         perror("send");
                                     }
                                     // printf("sent %d bytes to fd=%d: %s\n", len, recvr_fd, message); 
@@ -359,7 +364,7 @@ int main(int argc, char **argv)
                                 if(send(client_fd, payload, strlen(payload), 0) == -1) {
                                     perror("send");
                                 }
-                                printf("payload:\n%s\n", payload);
+                                // printf("payload:\n%s\n", payload);
                             }
 
                             if(strncmp("ex", buf, 2) == 0) {
@@ -479,48 +484,54 @@ int main(int argc, char **argv)
 
                         if(strcmp(token, "LOGIN") == 0 && logged_in == false) {
                             // LOGIN <server-ip> <server-port>
-                            cse4589_print_and_log("[%s:SUCCESS]\n", "LOGIN");
-							cse4589_print_and_log("[%s:END]\n", "LOGIN");
-
 
                             char *server_ip  = strtok(NULL, " ");
                             char *server_port = strtok(NULL, " ");
-                            int server_port_int = atoi(server_port);
-                            int len;
-                            struct sockaddr_in server_addr;
-                            if((server_fd = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
-                            	perror("LOGIN socket");
-                            	exit(EXIT_FAILURE);
+                            printf("sip: %s\n", server_ip);
+                            if(!isValidIP(server_ip)) {
+                                cse4589_print_and_log("[%s:ERROR]\n", "LOGIN");
+                                cse4589_print_and_log("[%s:END]\n", "LOGIN");
+                            } else {
+                                int server_port_int = atoi(server_port);
+                                int len;
+                                struct sockaddr_in server_addr;
+                                if((server_fd = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
+                                	perror("LOGIN socket");
+                                	exit(EXIT_FAILURE);
+                                }
+                                bzero(&server_addr, sizeof(server_addr));
+                                server_addr.sin_family = AF_INET;
+                                inet_pton(AF_INET, server_ip, &server_addr.sin_addr);
+                                server_addr.sin_port = htons(server_port_int);
+                                memset(&hints, 0, sizeof(struct addrinfo));
+
+                                if(connect(server_fd, (struct sockaddr*)&server_addr, sizeof(server_addr)) == -1) {
+                                	cse4589_print_and_log("[%s:ERROR]\n", "LOGIN");
+                                    cse4589_print_and_log("[%s:END]\n", "LOGIN");
+                                    // perror("LOGIN connect");
+                                    break;
+                                }
+
+
+                                FD_SET(server_fd, &master);
+                                if(server_fd > fd_max) fd_max = server_fd;
+                                // printf("selectserver: new connection fd: %d\n", server_fd);
+
+                                // Send server client listening port
+                                char *head = "lo";
+                                char port_str[32];
+                                memset(port_str, '\0', sizeof(port_str));
+                                snprintf(port_str, sizeof(port_str), "%s%d", head, port_int);
+                                // printf("sending port info: %s\n", port_str);
+                                if(send(server_fd, port_str, strlen(port_str), 0) == -1) {
+                                    perror("send");
+                                }
+
+                                logged_in = true;
                             }
-                            bzero(&server_addr, sizeof(server_addr));
-                            server_addr.sin_family = AF_INET;
-                            inet_pton(AF_INET, server_ip, &server_addr.sin_addr);
-                            server_addr.sin_port = htons(server_port_int);
-                            memset(&hints, 0, sizeof(struct addrinfo));
-
-                            if(connect(server_fd, (struct sockaddr*)&server_addr, sizeof(server_addr)) == -1) {
-                            	perror("LOGIN connect");
-                            }
 
 
-                            FD_SET(server_fd, &master);
-                            if(server_fd > fd_max) fd_max = server_fd;
-                            // printf("selectserver: new connection fd: %d\n", server_fd);
-
-                            // Send server client listening port
-                            char *head = "lo";
-                            char port_str[32];
-                            memset(port_str, '\0', sizeof(port_str));
-                            snprintf(port_str, sizeof(port_str), "%s%d", head, port_int);
-                            // printf("sending port info: %s\n", port_str);
-                            if(send(server_fd, port_str, strlen(port_str), 0) == -1) {
-                                perror("send");
-                            }
-
-                            logged_in = true;
-
-
-                        } else if(strcmp(token, "REFRESH") == 0) {
+                        } else if(strcmp(token, "REFRESH") == 0 && logged_in) {
                             // REFRESH
                             cse4589_print_and_log("[%s:SUCCESS]\n", "REFRESH");
 							cse4589_print_and_log("[%s:END]\n", "REFRESH");
@@ -534,25 +545,31 @@ int main(int argc, char **argv)
                             }
                             printf("sent: %s\n", payload);
 
-                        } else if(strcmp(token, "SEND") == 0) {
+                        } else if(strcmp(token, "SEND")  == 0 && logged_in) {
                             // SEND <client-ip> <msg>
-                            // char *client_ip = strtok(NULL, " ");
-                            // char *msg = strtok(NULL, " ");
-                            cse4589_print_and_log("[%s:SUCCESS]\n", "SEND");
-							cse4589_print_and_log("[%s:END]\n", "SEND");
-
-
-                            char payload[256];
+                            char payload[512];
                             char *head = "se";
-                            char *message = strtok(NULL, "");
-                            snprintf(payload, sizeof(payload), "%s%s", head, message);
-                            int len = strlen(payload);
-                            if(server_fd != -1) {
-                                // Send to server
-                                if(send(server_fd, payload, len+1, 0) == -1) {
-                                    perror("send");
+                            char *client_ip = strtok(NULL, " ");
+                            char *msg = strtok(NULL, "");
+                            
+                            // Check if valid ip
+                            if(!isValidIP(client_ip) || !inClients(clients, client_ip)) {
+                                cse4589_print_and_log("[%s:ERROR]\n", "SEND");
+                                cse4589_print_and_log("[%s:END]\n", "SEND");
+                            } else {
+                                snprintf(payload, sizeof(payload), "%s%s %s %s", head, ip_addr, client_ip, msg);
+                                // printf("payload: %s\n", payload);
+                                int len = strlen(payload);
+                                if(server_fd != -1) {
+                                    // Send to server
+                                    if(send(server_fd, payload, len+1, 0) == -1) {
+                                        perror("send");
+                                    }
                                 }
+                                cse4589_print_and_log("[%s:SUCCESS]\n", "SEND");
+                                cse4589_print_and_log("[%s:END]\n", "SEND");
                             }
+
 
                         } else if(strcmp(token, "BROADCAST") == 0) {
                             // BROADCAST <msg>
@@ -673,9 +690,18 @@ int main(int argc, char **argv)
                             // Received list of clients
                             if(strncmp("li", buf, 2) == 0) {
                                 // printf("message: %s\n", message);
+                                cse4589_print_and_log("[%s:SUCCESS]\n", "LOGIN");
                                 memset(clients, '\0', sizeof(clients));
                                 strncpy(clients, server_payload, strlen(server_payload));
-                                printf("%s", clients);
+                                // printf("%s", clients);
+                                cse4589_print_and_log("[%s:END]\n", "LOGIN");
+                                
+                            }
+                            if(strncmp("re", buf, 2) == 0) {
+                                cse4589_print_and_log("[%s:SUCCESS]\n", "REFRESH");
+                                memset(clients, '\0', sizeof(clients));
+                                strncpy(clients, server_payload, strlen(server_payload));
+                                cse4589_print_and_log("[%s:END]\n", "REFRESH");
                             }
 
                             if(strncmp("se", buf, 2) == 0) {
@@ -687,7 +713,7 @@ int main(int argc, char **argv)
                             if(strncmp("ms", buf, 2) == 0) {
                                 char *ip = strtok(server_payload, " ");
                                 char *msg = strtok(NULL, "");
-                                printf("pay: %s\nip: %s\nmsg:%s\n", buf, ip, msg);
+                                // printf("pay: %s\nip: %s\nmsg:%s\n", buf, ip, msg);
                                 cse4589_print_and_log("msg from:%s\n[msg]:%s\n", ip, msg);
                             }
                         }

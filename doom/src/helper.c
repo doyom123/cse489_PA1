@@ -3,6 +3,8 @@
 #include <stddef.h>
 #include <arpa/inet.h>
 #include <netinet/in.h>
+#include <string.h>
+#include <stdio.h>
 
 bool 
 isValidInt(const char *input) {
@@ -17,10 +19,28 @@ isValidInt(const char *input) {
 bool
 isValidIP(const char *address) {
 	struct sockaddr_in sa;
-	if(inet_pton(AF_INET, address, &(sa.sin_addr)) == -1) {
+	if(inet_pton(AF_INET, address, &(sa.sin_addr)) <= 0) {
+		printf("false\n");
 		return false;
 	}
+	printf("true\n");
 	return true;	
+}
+
+bool
+inClients(char *clients, const char *address) {
+	char *token = strtok(clients, "\n");
+    while(token != NULL) {
+        printf("token: %s\n", token);
+        char *ret;
+        ret = strstr(token, address);
+     	printf("ret: %s\n", ret);
+        if(ret != NULL) {
+            return true;
+        }
+        token = strtok(NULL, "\n");
+	}
+	return false;
 }
 
 // char* ip_string(const struct sockaddr *sa,  char *dst, size_t size) {
