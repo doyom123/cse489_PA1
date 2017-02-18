@@ -281,7 +281,7 @@ int main(int argc, char **argv)
                                                 perror("send");
                                             } else {
                                                 vec_msg_sent(&clients, client_ip);
-                                                vec_msg_recv_fd(&clients, fd);
+                                                vec_msg_recv_fd(&clients, j);
                                                 printf("fd: %d\nmsg: %s\n", j, msg);
                                             }
                                             
@@ -330,15 +330,16 @@ int main(int argc, char **argv)
                                 // for localhost testing
                                 char ip_localhost[INET_ADDRSTRLEN] = "127.0.1.1";
                                 strncpy(listing->hostname, host, sizeof(listing->hostname));
-                                strncpy(listing->address, ip_addr, sizeof(listing->address));
+                                strncpy(listing->address, ip, sizeof(listing->address));
                                 sprintf(portstr, "%s", client_payload);
                                 listing->port = atoi(portstr);
                                 listing->fd = new_fd;
+				printf("clientip: %s\n", ip_addr);
 
                                 int result = vec_insert_sorted(&clients, listing);
 
                                 // Send client list
-                                char c_payload[1024];
+                                char c_payload[1024] = "";
                                 char head[3] = "li";
                                 char client_list[1024] = "";
                                 vec_clients(&clients, client_list);
@@ -360,11 +361,11 @@ int main(int argc, char **argv)
                                     break;
                                 }
                                 // printf("refresh fd: %d\n", client_fd);
-                                char *head = "li";
+                                char *head = "re";
                                 char client_list[1024] = "";
                                 char payload[1024] = "";
                                 vec_clients(&clients, client_list);
-                                snprintf(payload, sizeof(payload), "%s %s", head, client_list);
+                                snprintf(payload, sizeof(payload), "%s%s", head, client_list);
                                 if(send(client_fd, payload, strlen(payload), 0) == -1) {
                                     perror("send");
                                 }
