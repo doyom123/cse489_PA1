@@ -50,13 +50,13 @@
  */
 int main(int argc, char **argv)
 {
-	/*Init. Logger*/
-	cse4589_init_log(argv[2]);
+    /*Init. Logger*/
+    cse4589_init_log(argv[2]);
 
-	/*Clear LOGFILE*/
-	fclose(fopen(LOGFILE, "w"));
+    /*Clear LOGFILE*/
+    fclose(fopen(LOGFILE, "w"));
 
-	/*Start Here*/
+    /*Start Here*/
 
 
     // Parse command line args
@@ -182,11 +182,11 @@ int main(int argc, char **argv)
                         }
                         char *token;
                         if(status > 1) {
-	                        buf[status-1] = '\0';
-	                        token = strtok(buf, " ");
+                            buf[status-1] = '\0';
+                            token = strtok(buf, " ");
                         } else {
-                        	buf[0] = '\0';
-                        	token = buf;
+                            buf[0] = '\0';
+                            token = buf;
                         }
                         // SHELL Commands
                         if(strcmp(token, "AUTHOR") == 0) {
@@ -196,28 +196,28 @@ int main(int argc, char **argv)
                             cse4589_print_and_log("AUTHOR:%s\n", msg);
                             cse4589_print_and_log("[%s:END]\n", "AUTHOR");
                         } else if(strcmp(token, "IP") == 0) {
-                        	// IP
+                            // IP
                             cse4589_print_and_log("[%s:SUCCESS]\n", "IP");
                             cse4589_print_and_log("IP:%s\n", ip_addr);
                             cse4589_print_and_log("[%s:END]\n", "IP");
                         } else if(strcmp(token, "PORT") == 0) {
-                        	// PORT
+                            // PORT
                             cse4589_print_and_log("[%s:SUCCESS]\n", "PORT");
                             cse4589_print_and_log("PORT:%d\n", port_int);
                             cse4589_print_and_log("[%s:END]\n", "PORT");
                         } else if(strcmp(token, "LIST") == 0) {
-                        	// LIST
-                        	// cse4589_print_and_log("[%s:SUCCESS]\n", "LIST");
+                            // LIST
+                            // cse4589_print_and_log("[%s:SUCCESS]\n", "LIST");
                             vec_print_list(&clients);
                             // cse4589_print_and_log("[%s:END]\n", "LIST");
 
                         } else if(strcmp(token, "STATISTICS") == 0) {
-                        	// cse4589_print_and_log("[%s:SUCCESS]\n", "STATISTICS");
+                            // cse4589_print_and_log("[%s:SUCCESS]\n", "STATISTICS");
                             vec_print_statistic(&clients);
                             // cse4589_print_and_log("[%s:END]\n", "STATISTICS");
                         } else if(strcmp(token, "BLOCKED") == 0) {
                             char *client_ip = strtok(NULL, "");
-                        	// cse4589_print_and_log("[%s:SUCCESS]\n", "BLOCKED");
+                            // cse4589_print_and_log("[%s:SUCCESS]\n", "BLOCKED");
                             vec_print_blocked(&clients, client_ip);
                             // cse4589_print_and_log("[%s:END]\n", "BLOCKED");
 
@@ -270,7 +270,7 @@ int main(int argc, char **argv)
                                 int client_fd = vec_get_fd(&clients, client_ip);
                                 char *payload;
                                 // printf("clientfd: %d\n", client_fd);
-                             	cse4589_print_and_log("msg from %s to: %s\n[msg]:%s\n", client_ip, "255.255.255.255", msg);
+                                cse4589_print_and_log("msg from %s to: %s\n[msg]:%s\n", client_ip, "255.255.255.255", msg);
                                 char to_client[512] = "";
                                 char *head = "ms";
                                 snprintf(to_client, sizeof(to_client), "%s%s %s", head, client_ip, msg);
@@ -280,7 +280,9 @@ int main(int argc, char **argv)
                                             if(send(j, to_client, strlen(to_client), 0) == -1) {
                                                 perror("send");
                                             } else {
-                                            	printf("fd: %d\nmsg: %s\n", j, msg);
+                                                vec_msg_sent(&clients, client_ip);
+                                                vec_msg_recv_fd(&clients, fd);
+                                                printf("fd: %d\nmsg: %s\n", j, msg);
                                             }
                                             
                                         } 
@@ -288,7 +290,6 @@ int main(int argc, char **argv)
                                 }
                             }
                             // Check command received from client == SEND
-                            // #TODO: NOT SENDING
                             if(strncmp("se", buf, 2) == 0) {
                                 char *client_ip = strtok(client_payload, " ");
                                 char *recvr_ip = strtok(NULL, " ");
@@ -304,8 +305,11 @@ int main(int argc, char **argv)
                                 if(recvr_fd >= 0) {
                                     if(send(recvr_fd, to_client, strlen(to_client), 0) == -1) {
                                         perror("send");
+                                    } else {
+                                        // printf("sent %d bytes to fd=%d: %s\n", len, recvr_fd, message); 
+                                        vec_msg_sent(&clients, client_ip);
+                                        vec_msg_recv(&clients, recvr_ip);
                                     }
-                                    // printf("sent %d bytes to fd=%d: %s\n", len, recvr_fd, message); 
                                 }
                             } 
                             // After login, receive and assign client listening port
@@ -326,7 +330,7 @@ int main(int argc, char **argv)
                                 // for localhost testing
                                 char ip_localhost[INET_ADDRSTRLEN] = "127.0.1.1";
                                 strncpy(listing->hostname, host, sizeof(listing->hostname));
-                                strncpy(listing->address, ip_localhost, sizeof(listing->address));
+                                strncpy(listing->address, ip_addr, sizeof(listing->address));
                                 sprintf(portstr, "%s", client_payload);
                                 listing->port = atoi(portstr);
                                 listing->fd = new_fd;
@@ -446,13 +450,13 @@ int main(int argc, char **argv)
                             perror("read from stdin");
                             exit(EXIT_FAILURE);
                         }
-                      	char *token;
+                        char *token;
                         if(status > 1) {
-	                        buf[status-1] = '\0';
-	                        token = strtok(buf, " ");
+                            buf[status-1] = '\0';
+                            token = strtok(buf, " ");
                         } else {
-                        	buf[0] = '\0';
-                        	token = buf;
+                            buf[0] = '\0';
+                            token = buf;
                         }
                         // printf("token = %s\n",  token);
 
@@ -463,20 +467,20 @@ int main(int argc, char **argv)
                             cse4589_print_and_log("AUTHOR:%s\n", msg);
                             cse4589_print_and_log("[%s:END]\n", "AUTHOR");
                         } else if(strcmp(token, "IP") == 0) {
-                        	// IP
-                        	// status = sprintf(msg, "IP:%s\n", ip_addr);
+                            // IP
+                            // status = sprintf(msg, "IP:%s\n", ip_addr);
                             cse4589_print_and_log("[%s:SUCCESS]\n", "IP");
                             cse4589_print_and_log("IP:%s\n", ip_addr);
                             cse4589_print_and_log("[%s:END]\n", "IP");
                         } else if(strcmp(token, "PORT") == 0) {
-                        	// PORT
-                    		// status = sprintf(msg, "PORT:%d\n", port_int);
+                            // PORT
+                            // status = sprintf(msg, "PORT:%d\n", port_int);
                             cse4589_print_and_log("[%s:SUCCESS]\n", "PORT");
                             cse4589_print_and_log("PORT:%d\n", port_int);
                             cse4589_print_and_log("[%s:END]\n", "PORT");
                         } else if(strcmp(token, "LIST") == 0) {
-                        	// LIST
-                        	cse4589_print_and_log("[%s:SUCCESS]\n", "LIST");
+                            // LIST
+                            cse4589_print_and_log("[%s:SUCCESS]\n", "LIST");
                             cse4589_print_and_log("%s", clients);
                             cse4589_print_and_log("[%s:END]\n", "LIST");
 
@@ -496,8 +500,8 @@ int main(int argc, char **argv)
                                 int len;
                                 struct sockaddr_in server_addr;
                                 if((server_fd = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
-                                	perror("LOGIN socket");
-                                	exit(EXIT_FAILURE);
+                                    perror("LOGIN socket");
+                                    exit(EXIT_FAILURE);
                                 }
                                 bzero(&server_addr, sizeof(server_addr));
                                 server_addr.sin_family = AF_INET;
@@ -506,7 +510,7 @@ int main(int argc, char **argv)
                                 memset(&hints, 0, sizeof(struct addrinfo));
 
                                 if(connect(server_fd, (struct sockaddr*)&server_addr, sizeof(server_addr)) == -1) {
-                                	cse4589_print_and_log("[%s:ERROR]\n", "LOGIN");
+                                    cse4589_print_and_log("[%s:ERROR]\n", "LOGIN");
                                     cse4589_print_and_log("[%s:END]\n", "LOGIN");
                                     // perror("LOGIN connect");
                                     break;
@@ -534,7 +538,7 @@ int main(int argc, char **argv)
                         } else if(strcmp(token, "REFRESH") == 0 && logged_in) {
                             // REFRESH
                             cse4589_print_and_log("[%s:SUCCESS]\n", "REFRESH");
-							cse4589_print_and_log("[%s:END]\n", "REFRESH");
+                            cse4589_print_and_log("[%s:END]\n", "REFRESH");
 
 
                             char payload[256];
@@ -578,9 +582,9 @@ int main(int argc, char **argv)
                             char *message = strtok(NULL, "");
 
                             cse4589_print_and_log("[%s:SUCCESS]\n", "BROADCAST");
-							// cse4589_print_and_log(“BROADCAST:%s\n”, ip_addr);
-							cse4589_print_and_log("%s\n", message);
-							cse4589_print_and_log("[%s:END]\n", "BROADCAST");
+                            // cse4589_print_and_log(“BROADCAST:%s\n”, ip_addr);
+                            cse4589_print_and_log("%s\n", message);
+                            cse4589_print_and_log("[%s:END]\n", "BROADCAST");
 
                             snprintf(payload, sizeof(payload), "%s%s %s", head, ip_addr, message);
                             if(server_fd != -1) {
@@ -594,37 +598,44 @@ int main(int argc, char **argv)
 
                         } else if(strcmp(token, "BLOCK") == 0) {
                             // BLOCK <client-ip>
-                            cse4589_print_and_log("[%s:SUCCESS]\n", "BLOCK");
-							cse4589_print_and_log("[%s:END]\n", "BLOCK");
-
-
                             char *client_ip = strtok(NULL, " ");
                             char payload[256] = "";
                             char *head = "bl";
-                            snprintf(payload, sizeof(payload), "%s%s %s", head, ip_addr, client_ip);
-                            if(send(server_fd, payload, strlen(payload), 0) == -1) {
-                                perror("send");
+                            if(!isValidIP(client_ip) || !inClients(clients, client_ip)) {
+                                cse4589_print_and_log("[%s:ERROR]\n", "SEND");
+                                cse4589_print_and_log("[%s:END]\n", "SEND");
+                            } else {
+                                snprintf(payload, sizeof(payload), "%s%s %s", head, ip_addr, client_ip);
+                                if(send(server_fd, payload, strlen(payload), 0) == -1) {
+                                    perror("send");
+                                }
+                                printf("block: %s\n", payload);
+                                cse4589_print_and_log("[%s:SUCCESS]\n", "BLOCK");
+                                cse4589_print_and_log("[%s:END]\n", "BLOCK");
                             }
-                            printf("block: %s\n", payload);
 
                         } else if(strcmp(token, "UNBLOCK") == 0) {
                             // UNBLOCK <client-ip>
-	                        cse4589_print_and_log("[%s:SUCCESS]\n", "UNBLOCK");
-							cse4589_print_and_log("[%s:END]\n", "UNBLOCK");
+                            cse4589_print_and_log("[%s:SUCCESS]\n", "UNBLOCK");
+                            cse4589_print_and_log("[%s:END]\n", "UNBLOCK");
 
                             char *client_ip = strtok(NULL, " ");
                             char payload[256] = "";
                             char *head = "ub";
-                            snprintf(payload, sizeof(payload), "%s%s %s", head, ip_addr, client_ip);
-                            if(send(server_fd, payload, strlen(payload), 0) == -1) {
-                                perror("send");
+                            if(!isValidIP(client_ip) || !inClients(clients, client_ip)) {
+                                cse4589_print_and_log("[%s:ERROR]\n", "SEND");
+                                cse4589_print_and_log("[%s:END]\n", "SEND");
+                            } else {
+                                snprintf(payload, sizeof(payload), "%s%s %s", head, ip_addr, client_ip);
+                                if(send(server_fd, payload, strlen(payload), 0) == -1) {
+                                    perror("send");
+                                }
+                                printf("unblock: %s\n", payload);
                             }
-                            printf("unblock: %s\n", payload);
-
 
                         } else if(strcmp(token, "LOGOUT") == 0) {
                             cse4589_print_and_log("[%s:SUCCESS]\n", "LOGOUT");
-							cse4589_print_and_log("[%s:END]\n", "LOGOUT");
+                            cse4589_print_and_log("[%s:END]\n", "LOGOUT");
                             
                             char payload[256];
                             char *head = "lg";
@@ -646,7 +657,7 @@ int main(int argc, char **argv)
                             // EXIT
                             // TODO: send signal to server
                             cse4589_print_and_log("[%s:SUCCESS]\n", "EXIT");
-							cse4589_print_and_log("[%s:END]\n", "EXIT");
+                            cse4589_print_and_log("[%s:END]\n", "EXIT");
 
 
                             char payload[256];
@@ -659,7 +670,7 @@ int main(int argc, char **argv)
                         } else if(strcmp(token, "SENDFILE") == 0) {
                             // SENDFILE <client-ip> <file>
                             cse4589_print_and_log("[%s:SUCCESS]\n", "SENDFILE");
-							cse4589_print_and_log("[%s:END]\n", "SENDFILE");
+                            cse4589_print_and_log("[%s:END]\n", "SENDFILE");
 
 
                             char *client_ip = strtok(NULL, " ");
@@ -705,9 +716,9 @@ int main(int argc, char **argv)
                             }
 
                             if(strncmp("se", buf, 2) == 0) {
-	                            cse4589_print_and_log("[%s:SUCCESS]\n", "RECEIVED");
+                                cse4589_print_and_log("[%s:SUCCESS]\n", "RECEIVED");
                                 cse4589_print_and_log("%s\n", server_payload);
-								cse4589_print_and_log("[%s:END]\n", "RECEIVED");
+                                cse4589_print_and_log("[%s:END]\n", "RECEIVED");
                             }
 
                             if(strncmp("ms", buf, 2) == 0) {
@@ -725,6 +736,6 @@ int main(int argc, char **argv)
 
     }
     
-    close(fd);	
-	return 0;
+    close(fd);  
+    return 0;
 }

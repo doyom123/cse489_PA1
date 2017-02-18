@@ -188,6 +188,38 @@ void vec_unblock(Vector *vec, char *address, char *unblock_address) {
 	}
 }
 
+void vec_msg_sent(Vector *vec, char *address) {
+	for(int i = 0; i < vec->size; i++) {
+		Listing *curr = vec->data[i];
+		if(strcmp(curr->address, address) == 0) {
+			curr->msg_sent++;
+			printf("msg_sent: %d\n", curr->msg_sent);
+			break;
+		}
+	}
+}
+void vec_msg_recv(Vector *vec, char *address) {
+	for(int i = 0; i < vec->size; i++) {
+		Listing *curr = vec->data[i];
+		if(strcmp(curr->address, address) == 0) {
+			curr->msg_recv++;
+			printf("msg_recv: %d\n", curr->msg_recv);
+			break;
+		}
+	}
+}
+
+void vec_msg_recv_fd(Vector *vec, int fd) {
+	for(int i = 0; i < vec->size; i++) {
+		Listing *curr = vec->data[i];
+		if(curr->fd == fd) {
+			curr->msg_recv++;
+			printf("msg_recv: %d\n", curr->msg_recv);
+			break;
+		}
+	}
+}
+
 
 void vec_free(Vector *vec) {
 	for(int i = 0; i < vec->size; i++) {

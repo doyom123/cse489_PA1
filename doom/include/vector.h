@@ -46,7 +46,9 @@ void vec_print_blocked(Vector *vec, char *address);
 void vec_clients(Vector *vec, char *str_array);
 void vec_block(Vector *vec, char *address, char *block_address);
 void vec_unblock(Vector *vec, char *address, char *unblock_address);
-
+void vec_msg_sent(Vector *vec, char *address);
+void vec_msg_recv(Vector *vec, char *address);
+void vec_msg_recv_fd(Vector *vec, int fd);
 void vec_append(Vector *vec, Listing *l);
 void vec_free(Vector *vec);
 void vec_remove(Vector *vec, char *address);
