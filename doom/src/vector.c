@@ -244,7 +244,7 @@ void vec_print_blocked(Vector *vec, char *address) {
 	
 	for(int i = 0; i < vec->size; i++) {
 		Listing *curr = vec->data[i];
-		printf("cad: %s\naddr: %s\n", curr->address, address);
+		// printf("cad: %s\naddr: %s\n", curr->address, address);
 		if(strcmp(curr->address, address) == 0) {
 			vs = vec->data[i]->blocked;
 			break;			

@@ -267,14 +267,20 @@ int main(int argc, char **argv)
                                 // printf("brconfirmed\n");
                                 char *client_ip = strtok(client_payload, " ");
                                 char *msg = strtok(NULL, "");
+                                int client_fd = vec_get_fd(&clients, client_ip);
+                                char *payload;
+                                // printf("clientfd: %d\n", client_fd);
                              	cse4589_print_and_log("msg from %s to: %s\n[msg]:%s\n", client_ip, "255.255.255.255", msg);
+                                char to_client[512] = "";
+                                char *head = "ms";
+                                snprintf(to_client, sizeof(to_client), "%s%s %s", head, client_ip, msg);
                                 for(int j = 1; j <= fd_max; j++) {
                                     if(FD_ISSET(j, &master)) {
-                                        if(j != fd) {
-                                            if(send(j, msg, sizeof(msg), 0) == -1) {
+                                        if(j != fd && j != client_fd) {
+                                            if(send(j, to_client, strlen(to_client), 0) == -1) {
                                                 perror("send");
                                             } else {
-                                            	
+                                            	printf("fd: %d\nmsg: %s\n", j, msg);
                                             }
                                             
                                         } 
@@ -315,7 +321,7 @@ int main(int argc, char **argv)
                                 // for localhost testing
                                 char ip_localhost[INET_ADDRSTRLEN] = "127.0.1.1";
                                 strncpy(listing->hostname, host, sizeof(listing->hostname));
-                                strncpy(listing->address, ip, sizeof(listing->address));
+                                strncpy(listing->address, ip_localhost, sizeof(listing->address));
                                 sprintf(portstr, "%s", client_payload);
                                 listing->port = atoi(portstr);
                                 listing->fd = new_fd;
@@ -327,7 +333,7 @@ int main(int argc, char **argv)
                                 char head[3] = "li";
                                 char client_list[1024] = "";
                                 vec_clients(&clients, client_list);
-                                snprintf(c_payload, sizeof(c_payload),"%s %s", head, client_list);
+                                snprintf(c_payload, sizeof(c_payload),"%s%s", head, client_list);
                                 if(send(new_fd, c_payload, strlen(c_payload), 0) == -1) {
                                     perror("send");
                                 }
@@ -473,7 +479,6 @@ int main(int argc, char **argv)
 
                         if(strcmp(token, "LOGIN") == 0 && logged_in == false) {
                             // LOGIN <server-ip> <server-port>
-                            // #TODO CHANGE THIS TO WORK FOR IPV6 AS WELL
                             cse4589_print_and_log("[%s:SUCCESS]\n", "LOGIN");
 							cse4589_print_and_log("[%s:END]\n", "LOGIN");
 
@@ -659,23 +664,31 @@ int main(int argc, char **argv)
                             FD_CLR(i, &master);
                         } else {
                             int len = strlen(buf);
-                            // printf("recvd %d bytes: %s\n", nbytes, buf);
-
-                            char *head = strtok(buf, " ");
-                            char *message = strtok(NULL, "");
+                            printf("recvd %d bytes: %s\n", nbytes, buf);
+                            char server_payload[BUFSIZE] = "";
+                            strncpy(server_payload, &(buf[2]), nbytes-2);
+                            // char *head = strtok(buf, " ");
+                            // char *message = strtok(NULL, "");
                             // printf("head: %s\n", head);
                             // Received list of clients
-                            if(strcmp(head, "li") == 0) {
+                            if(strncmp("li", buf, 2) == 0) {
                                 // printf("message: %s\n", message);
                                 memset(clients, '\0', sizeof(clients));
-                                strncpy(clients, message, strlen(message));
+                                strncpy(clients, server_payload, strlen(server_payload));
                                 printf("%s", clients);
                             }
 
-                            if(strcmp(head, "se") == 0) {
+                            if(strncmp("se", buf, 2) == 0) {
 	                            cse4589_print_and_log("[%s:SUCCESS]\n", "RECEIVED");
-                                cse4589_print_and_log("%s\n", message);
+                                cse4589_print_and_log("%s\n", server_payload);
 								cse4589_print_and_log("[%s:END]\n", "RECEIVED");
+                            }
+
+                            if(strncmp("ms", buf, 2) == 0) {
+                                char *ip = strtok(server_payload, " ");
+                                char *msg = strtok(NULL, "");
+                                printf("pay: %s\nip: %s\nmsg:%s\n", buf, ip, msg);
+                                cse4589_print_and_log("msg from:%s\n[msg]:%s\n", ip, msg);
                             }
                         }
 
