@@ -2,6 +2,9 @@
 #include <limits.h>
 
 #define INITIAL_CAPACITY 10
+
+typedef struct Vector Vector;
+
 typedef struct {
 	int size;
 	int capacity;
@@ -16,18 +19,18 @@ typedef struct {
 	int msg_recv;
 	char status[20];
 	int fd;
-	VectorStr blocked;
+	Vector *blocked;
 	VectorStr buf_msg;
 } Listing;
 
 
-typedef struct {
+struct Vector {
 	int size;
 	int num_loggedin;
 	int capacity;
 	Listing **data;
 
-} Vector;
+};
 
 void vecstr_init(VectorStr *vs);
 void vecstr_double_size_if_full(VectorStr *vs);

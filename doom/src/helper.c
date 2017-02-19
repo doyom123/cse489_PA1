@@ -6,6 +6,9 @@
 #include <string.h>
 #include <stdio.h>
 
+void
+nop() {};
+
 bool 
 isValidInt(const char *input) {
 	int i = 0;

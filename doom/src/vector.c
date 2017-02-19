@@ -65,7 +65,8 @@ void listing_init(Listing *l) {
 	strncpy(l->status, "logged-in", sizeof(l->status));
 	l->port = 0;
 	// strcpy(l->port, port);
-	vecstr_init(&(l->blocked));
+	l->blocked = malloc(sizeof(Vector));
+	vec_init(l->blocked);
 	vecstr_init(&(l->buf_msg));
 
 }
@@ -74,7 +75,6 @@ void vec_init(Vector *vec) {
 	vec->size = 0;
 	vec->num_loggedin = 0;
 	vec->capacity = INITIAL_CAPACITY;
-
 	vec->data = malloc(sizeof(Listing *) * vec->capacity);	
 }
 
@@ -153,26 +153,32 @@ void vec_remove(Vector *vec, char *address) {
 	}
 }
 
-// 	for(int i = index; i < vec->size-1; i++) {
-// 		vec->data[i] = vec->data[i + 1];
-// 	}
-// 	vec->size--;
-// }
-
-// Listing vec_get(Vector *vec, int index) {
-// 	return vec->data[index];
-// }
-
-// void vec_set(Vector *vec, int index, Listing l) {
-// 	vec->data[index] = l;
-// }
-
 void vec_block(Vector *vec, char *address, char *block_address) {
+	int block_address_index = -1;
+	for(int i = 0; i < vec->size; i++) {
+		Listing *curr = vec->data[i];
+		// printf("vec_block : curr->address: %s\n", curr->address);
+		if(strcmp(curr->address, block_address) == 0) {
+			block_address_index = i;
+			break;
+		}
+	}
+
+	if(block_address_index == -1) return;
+
+	Listing *blocked_listing = vec->data[block_address_index];
 	for(int i = 0; i < vec->size; i++) {
 		Listing *curr = vec->data[i];
 		if(strcmp(curr->address, address) == 0) {
-			vecstr_append(&(curr->blocked), block_address);
-			printf("blocked: %s\n", curr->blocked.data[0]);
+			Listing *new_listing = malloc(sizeof(Listing));
+			listing_init(new_listing);
+			strcpy(new_listing->hostname, blocked_listing->hostname);
+			// new_listing->hostname = blocked_listing->hostname;
+			strcpy(new_listing->address, blocked_listing->address);
+			// new_listing->address = blocked_listing->address;
+			new_listing->port = blocked_listing->port;
+			vec_insert_sorted(curr->blocked, new_listing);
+			// printf("blocked: %s\n", curr->blocked.data[0]);
 			break;
 		}
 	}
@@ -182,10 +188,11 @@ void vec_unblock(Vector *vec, char *address, char *unblock_address) {
 	for(int i = 0; i < vec->size; i++) {
 		Listing *curr = vec->data[i];
 		if(strcmp(curr->address, address) == 0) {
-			vecstr_remove(&(curr->blocked), unblock_address);
+			vec_remove(curr->blocked, unblock_address);
 			break; 
 		}
 	}
+	printf("finished vec_unblock");
 }
 
 void vec_msg_sent(Vector *vec, char *address) {
@@ -223,7 +230,8 @@ void vec_msg_recv_fd(Vector *vec, int fd) {
 
 void vec_free(Vector *vec) {
 	for(int i = 0; i < vec->size; i++) {
-		free(vec->data[i]->blocked.data);
+		free(vec->data[i]->blocked->data);
+		free(vec->data[i]->blocked);
 		free(vec->data[i]->buf_msg.data);
 		free(vec->data[i]);
 	}
@@ -240,7 +248,7 @@ void vec_print(Vector *vec, char *address) {
 
 void vec_print_list(Vector *vec) {
 	int j = 0;
-	cse4589_print_and_log("[%s:SUCCESS]\n", "LIST");
+	// cse4589_print_and_log("[%s:SUCCESS]\n", "LIST");
 	for(int i = 0; i < vec->size; i++) {
 		Listing *curr = vec->data[i];
 		// printf("***host: %s, addr: %s port: %d fd: %d\n", vec->data[i]->hostname, vec->data[i]->address, vec->data[i]->port, vec->data[i]->fd);
@@ -251,7 +259,7 @@ void vec_print_list(Vector *vec) {
 		}
 
 	}
-    cse4589_print_and_log("[%s:END]\n", "LIST");
+    // cse4589_print_and_log("[%s:END]\n", "LIST");
 
 }
 
@@ -272,8 +280,9 @@ void vec_print_blocked(Vector *vec, char *address) {
 		return;	
 	}
 
-	VectorStr vs = { .size = -1 };
-	
+
+	Vector *vs;
+
 	for(int i = 0; i < vec->size; i++) {
 		Listing *curr = vec->data[i];
 		// printf("cad: %s\naddr: %s\n", curr->address, address);
@@ -282,15 +291,16 @@ void vec_print_blocked(Vector *vec, char *address) {
 			break;			
 		}
 	}
-	if(vs.size == -1) {
+	if(vs == NULL) {
 		cse4589_print_and_log("[%s:ERROR]\n", "BLOCKED");
 	} else {
 		cse4589_print_and_log("[%s:SUCCESS]\n", "BLOCKED");
-		for(int i = 0; i < vs.size; i++) {
-			Listing *curr = vec->data[i];
+		vec_print_list(vs);
+		// for(int i = 0; i < vs->size; i++) {
+		// 	Listing l = vs->data[i];
 			// cse4589_print_and_log("%-5d%-35s%-20s%-8d\n", j+1, curr->hostname, curr->address, curr->port);
-			// printf("vs: %s\n", vs.data[i]);
-		}
+			// printf("vs: %s\n", blocked_addr);
+		// }
 	}
     cse4589_print_and_log("[%s:END]\n", "BLOCKED");
 }

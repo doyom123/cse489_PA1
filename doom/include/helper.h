@@ -10,7 +10,7 @@ typedef int bool;
 #define true 1
 
 #define PORTSIZE 65535
-
+void nop();
 bool isValidInt(const char *input);
 bool isValidIP(const char *address);
 bool inClients(char *clients, const char *address);

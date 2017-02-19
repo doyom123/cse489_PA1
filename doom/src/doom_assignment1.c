@@ -58,7 +58,7 @@ int main(int argc, char **argv)
 
     /*Start Here*/
 
-
+    char *prompt = "[PA1]$ ";
     // Parse command line args
     if(argc != 3 ||\
        (strcmp(argv[1], "s") != 0 &&  strcmp(argv[1], "c") != 0) ||\
@@ -139,11 +139,29 @@ int main(int argc, char **argv)
 
     // Server Code
 
-
+    nop();
     if(strcmp(argv[1], "s") == 0) {
         // List of clients
         Vector clients;
         vec_init(&clients);
+
+        // local testing
+        Listing l1;
+        listing_init(&l1);
+        strcpy(l1.hostname, "test1");
+        strcpy(l1.address, "128.0.0.3");
+        l1.port = 8888;
+        Listing l2;
+        listing_init(&l2);
+        strcpy(l2.hostname, "test2");
+        strcpy(l2.address, "128.0.0.4");
+        l2.port = 5555;
+        vec_insert_sorted(&clients, &l1);
+        vec_insert_sorted(&clients, &l2);
+
+
+
+
 
         // List of messages
         VectorStr msgs;
@@ -164,6 +182,7 @@ int main(int argc, char **argv)
         FD_SET(fd, &master);
         // Listing listing;
         for(;;) {
+            write(1, prompt, strlen(prompt));
             memset(buf, '\0', sizeof(buf));
             read_fds = master;
             if(select(fd_max+1, &read_fds, NULL,\
@@ -207,9 +226,9 @@ int main(int argc, char **argv)
                             cse4589_print_and_log("[%s:END]\n", "PORT");
                         } else if(strcmp(token, "LIST") == 0) {
                             // LIST
-                            // cse4589_print_and_log("[%s:SUCCESS]\n", "LIST");
+                            cse4589_print_and_log("[%s:SUCCESS]\n", "LIST");
                             vec_print_list(&clients);
-                            // cse4589_print_and_log("[%s:END]\n", "LIST");
+                            cse4589_print_and_log("[%s:END]\n", "LIST");
 
                         } else if(strcmp(token, "STATISTICS") == 0) {
                             // cse4589_print_and_log("[%s:SUCCESS]\n", "STATISTICS");
@@ -330,7 +349,7 @@ int main(int argc, char **argv)
                                 // for localhost testing
                                 char ip_localhost[INET_ADDRSTRLEN] = "127.0.1.1";
                                 strncpy(listing->hostname, host, sizeof(listing->hostname));
-                                strncpy(listing->address, ip, sizeof(listing->address));
+                                strncpy(listing->address, ip_localhost, sizeof(listing->address));
                                 sprintf(portstr, "%s", client_payload);
                                 listing->port = atoi(portstr);
                                 listing->fd = new_fd;
@@ -396,7 +415,7 @@ int main(int argc, char **argv)
                                 // printf("ub: %s\n", client_payload);
                                 char *client_ip = strtok(client_payload, " ");
                                 char *unblock_ip = strtok(NULL, "");
-
+                                printf("entering vec_unblock\n");
                                 vec_unblock(&clients, client_ip, unblock_ip);
                                 vec_print_blocked(&clients, client_ip);
                             }
@@ -436,6 +455,8 @@ int main(int argc, char **argv)
         FD_SET(fd, &master);
 
         for(;;) {
+
+            write(1, prompt, strlen(prompt));
             memset(buf, '\0', sizeof(buf));
             read_fds = master;
             if(select(fd_max+1, &read_fds, NULL,\
@@ -610,7 +631,7 @@ int main(int argc, char **argv)
                                 if(send(server_fd, payload, strlen(payload), 0) == -1) {
                                     perror("send");
                                 }
-                                printf("block: %s\n", payload);
+                                // printf("block: %s\n", payload);
                                 cse4589_print_and_log("[%s:SUCCESS]\n", "BLOCK");
                                 cse4589_print_and_log("[%s:END]\n", "BLOCK");
                             }
