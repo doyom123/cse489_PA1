@@ -235,7 +235,6 @@ int main(int argc, char **argv)
                             // cse4589_print_and_log("[%s:SUCCESS]\n", "BLOCKED");
                             vec_print_blocked(&clients, client_ip);
                             // cse4589_print_and_log("[%s:END]\n", "BLOCKED");
-
                         }
                                                    
 
@@ -404,7 +403,6 @@ int main(int argc, char **argv)
 
                                 vec_block(&clients, client_ip, block_ip);
                                 vec_print_blocked(&clients, client_ip);
-
                             }
 
                             if(strncmp("ub", buf, 2) == 0) {
@@ -432,8 +430,10 @@ int main(int argc, char **argv)
 
     // Client Code
     else {
-        char clients[1024];
+        char clients_str[1024];
         bool logged_in = false;
+        Vector clients;
+        vec_init(&clients);
 
         if(listen(fd, BACKLOG) != 0) {
             perror("listen");
@@ -499,7 +499,7 @@ int main(int argc, char **argv)
                         } else if(strcmp(token, "LIST") == 0) {
                             // LIST
                             cse4589_print_and_log("[%s:SUCCESS]\n", "LIST");
-                            cse4589_print_and_log("%s", clients);
+                            vec_print_list(&clients);
                             cse4589_print_and_log("[%s:END]\n", "LIST");
 
                         }
@@ -575,7 +575,7 @@ int main(int argc, char **argv)
                             char *msg = strtok(NULL, "");
                             
                             // Check if valid ip
-                            if(!isValidIP(client_ip) || !inClients(clients, client_ip)) {
+                            if(!isValidIP(client_ip) || !inClients(&clients, client_ip)) {
                                 cse4589_print_and_log("[%s:ERROR]\n", "SEND");
                                 cse4589_print_and_log("[%s:END]\n", "SEND");
                             } else {
@@ -619,7 +619,7 @@ int main(int argc, char **argv)
                             char *client_ip = strtok(NULL, " ");
                             char payload[256] = "";
                             char *head = "bl";
-                            if(!isValidIP(client_ip) || !inClients(clients, client_ip)) {
+                            if(!isValidIP(client_ip) || !inClients(&clients, client_ip)) {
                                 cse4589_print_and_log("[%s:ERROR]\n", "SEND");
                                 cse4589_print_and_log("[%s:END]\n", "SEND");
                             } else {
@@ -640,7 +640,7 @@ int main(int argc, char **argv)
                             char *client_ip = strtok(NULL, " ");
                             char payload[256] = "";
                             char *head = "ub";
-                            if(!isValidIP(client_ip) || !inClients(clients, client_ip)) {
+                            if(!isValidIP(client_ip) || !inClients(&clients, client_ip)) {
                                 cse4589_print_and_log("[%s:ERROR]\n", "SEND");
                                 cse4589_print_and_log("[%s:END]\n", "SEND");
                             } else {
@@ -676,7 +676,7 @@ int main(int argc, char **argv)
                             // TODO: send signal to server
                             cse4589_print_and_log("[%s:SUCCESS]\n", "EXIT");
                             cse4589_print_and_log("[%s:END]\n", "EXIT");
-
+                            vec_free(&clients);
 
                             char payload[256];
                             char *head = "ex";
@@ -720,16 +720,25 @@ int main(int argc, char **argv)
                             if(strncmp("li", buf, 2) == 0) {
                                 // printf("message: %s\n", message);
                                 cse4589_print_and_log("[%s:SUCCESS]\n", "LOGIN");
-                                memset(clients, '\0', sizeof(clients));
-                                strncpy(clients, server_payload, strlen(server_payload));
+                                vec_free(&clients);
+                                vec_init(&clients);
+                                vec_create(&clients, server_payload);
+                                vec_print_list(&clients);
+                                // memset(clients, '\0', sizeof(clients));
+                                // strncpy(clients, server_payload, strlen(server_payload));
                                 // printf("%s", clients);
                                 cse4589_print_and_log("[%s:END]\n", "LOGIN");
                                 
                             }
                             if(strncmp("re", buf, 2) == 0) {
                                 cse4589_print_and_log("[%s:SUCCESS]\n", "REFRESH");
-                                memset(clients, '\0', sizeof(clients));
-                                strncpy(clients, server_payload, strlen(server_payload));
+                                // memset(clients, '\0', sizeof(clients));
+                                // strncpy(clients, server_payload, strlen(server_payload));
+                                vec_free(&clients);
+                                vec_init(&clients);
+                                vec_create(&clients, server_payload);
+                                vec_print_list(&clients);
+
                                 cse4589_print_and_log("[%s:END]\n", "REFRESH");
                             }
 

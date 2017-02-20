@@ -96,6 +96,28 @@ void vec_append(Vector *vec, Listing *l) {
 	printf("insert completed");
 }
 
+void vec_create(Vector *vec, char *clients) {
+	printf("clients: %s\n", clients);
+	char *token = strtok(clients, "\n");
+	
+	while(token != NULL) {
+		printf("token: %s\n", token);
+		int num = 0;
+		char hostname[256];
+		char address[256];
+		int port = 0;
+		// sscanf(token, "%d", &num);
+		sscanf(token, "%d %s %s %d", &num, hostname, address, &port);
+		Listing *l = malloc(sizeof(Listing));
+		listing_init(l);
+		strcpy(l->hostname, hostname);
+		strcpy(l->address, address);
+		l->port = port;
+		vec_insert_sorted(vec, l);
+		token = strtok(NULL, "\n");
+	}
+}
+
 // New login return 1
 // exisintg  return 2
 int vec_insert_sorted(Vector *vec, Listing *l) {
@@ -341,3 +363,14 @@ void vec_logout(Vector *vec, char *address) {
 		}
 	}
 }
+
+bool inClients(Vector *clients, const char *address) {
+	for(int i = 0; i < clients->size; i++) {
+		Listing *curr = clients->data[i];
+		if(strcmp(curr->address, address)) {
+			return true;
+		}
+	}
+	return false;
+}
+

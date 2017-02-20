@@ -1,6 +1,6 @@
 // https://www.happybearsoftware.com/implementing-a-dynamic-array
 #include <limits.h>
-
+#include "helper.h"
 #define INITIAL_CAPACITY 10
 
 typedef struct Vector Vector;
@@ -42,6 +42,7 @@ void vecstr_free(VectorStr *vs);
 void listing_init(Listing *l);
 void vec_init(Vector *vec);
 void vec_double_size_if_full(Vector *vec);
+void vec_create(Vector *vec, char *clients);
 void vec_print(Vector *vec, char *address);
 void vec_print_list(Vector *vec);
 void vec_print_statistic(Vector *vec);
@@ -60,3 +61,5 @@ int vec_insert_sorted(Vector *vec, Listing *l);
 Listing vec_get(Vector *vec, int index);
 void vec_set(Vector *vec, int index, Listing l);
 int vec_get_fd(Vector *vec, char *address);
+
+bool inClients(Vector *clients, const char *address);
