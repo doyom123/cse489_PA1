@@ -138,7 +138,6 @@ int main(int argc, char **argv)
     
 
     // Server Code
-
     nop();
     if(strcmp(argv[1], "s") == 0) {
         // List of clients
@@ -158,9 +157,6 @@ int main(int argc, char **argv)
         l2.port = 5555;
         vec_insert_sorted(&clients, &l1);
         vec_insert_sorted(&clients, &l2);
-
-
-
 
 
         // List of messages
@@ -349,11 +345,11 @@ int main(int argc, char **argv)
                                 // for localhost testing
                                 char ip_localhost[INET_ADDRSTRLEN] = "127.0.1.1";
                                 strncpy(listing->hostname, host, sizeof(listing->hostname));
-                                strncpy(listing->address, ip_localhost, sizeof(listing->address));
+                                strncpy(listing->address, ip, sizeof(listing->address));
                                 sprintf(portstr, "%s", client_payload);
                                 listing->port = atoi(portstr);
                                 listing->fd = new_fd;
-				printf("clientip: %s\n", ip_addr);
+                				printf("clientip: %s\n", ip_addr);
 
                                 int result = vec_insert_sorted(&clients, listing);
 
