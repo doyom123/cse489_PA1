@@ -23,10 +23,10 @@ bool
 isValidIP(const char *address) {
 	struct sockaddr_in sa;
 	if(inet_pton(AF_INET, address, &(sa.sin_addr)) <= 0) {
-		printf("false\n");
+		// printf("false\n");
 		return false;
 	}
-	printf("true\n");
+	// printf("true\n");
 	return true;	
 }
 

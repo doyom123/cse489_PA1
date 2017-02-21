@@ -143,20 +143,22 @@ int main(int argc, char **argv)
         // List of clients
         Vector clients;
         vec_init(&clients);
+        VectorStr msg_buffer;
+        vecstr_init(&msg_buffer);
 
         // local testing
-        Listing l1;
-        listing_init(&l1);
-        strcpy(l1.hostname, "test1");
-        strcpy(l1.address, "128.0.0.3");
-        l1.port = 8888;
-        Listing l2;
-        listing_init(&l2);
-        strcpy(l2.hostname, "test2");
-        strcpy(l2.address, "128.0.0.4");
-        l2.port = 5555;
-        vec_insert_sorted(&clients, &l1);
-        vec_insert_sorted(&clients, &l2);
+        // Listing l1;
+        // listing_init(&l1);
+        // strcpy(l1.hostname, "test1");
+        // strcpy(l1.address, "128.0.0.3");
+        // l1.port = 8888;
+        // Listing l2;
+        // listing_init(&l2);
+        // strcpy(l2.hostname, "test2");
+        // strcpy(l2.address, "128.0.0.4");
+        // l2.port = 5555;
+        // vec_insert_sorted(&clients, &l1);
+        // vec_insert_sorted(&clients, &l2);
 
 
         // List of messages
@@ -178,7 +180,7 @@ int main(int argc, char **argv)
         FD_SET(fd, &master);
         // Listing listing;
         for(;;) {
-            write(1, prompt, strlen(prompt));
+            // write(1, prompt, strlen(prompt));
             memset(buf, '\0', sizeof(buf));
             read_fds = master;
             if(select(fd_max+1, &read_fds, NULL,\
@@ -290,13 +292,13 @@ int main(int argc, char **argv)
                                 snprintf(to_client, sizeof(to_client), "%s%s %s", head, client_ip, msg);
                                 for(int j = 1; j <= fd_max; j++) {
                                     if(FD_ISSET(j, &master)) {
-                                        if(j != fd && j != client_fd) {
+                                        if(j != fd && j != client_fd && vec_is_blocked(&clients, client_ip, j) != 1) {
                                             if(send(j, to_client, strlen(to_client), 0) == -1) {
                                                 perror("send");
                                             } else {
                                                 vec_msg_sent(&clients, client_ip);
                                                 vec_msg_recv_fd(&clients, j);
-                                                printf("fd: %d\nmsg: %s\n", j, msg);
+                                                // printf("fd: %d\nmsg: %s\n", j, msg);
                                             }
                                             
                                         } 
@@ -312,15 +314,15 @@ int main(int argc, char **argv)
                                 char *head = "ms";             
                                 // printf("ip: %s\nmessage: %s\n", client_ip, message);
                                 int recvr_fd = vec_get_fd(&clients, recvr_ip);
-                                cse4589_print_and_log("msg from %s to: %s\n[msg]:%s\n", client_ip, recvr_ip, message);
-                                printf("recvr_fd: %d", recvr_fd);
+                                // printf("recvr_fd: %d", recvr_fd);
                                 char to_client[512] = "";
                                 snprintf(to_client, sizeof(to_client), "%s%s %s", head, client_ip, message);
-                                if(recvr_fd >= 0) {
+                                if(recvr_fd >= 0 && vec_is_blocked(&clients, client_ip, recvr_fd) != 1) {
                                     if(send(recvr_fd, to_client, strlen(to_client), 0) == -1) {
                                         perror("send");
                                     } else {
                                         // printf("sent %d bytes to fd=%d: %s\n", len, recvr_fd, message); 
+                                        cse4589_print_and_log("msg from %s to: %s\n[msg]:%s\n", client_ip, recvr_ip, message);
                                         vec_msg_sent(&clients, client_ip);
                                         vec_msg_recv(&clients, recvr_ip);
                                     }
@@ -348,7 +350,7 @@ int main(int argc, char **argv)
                                 sprintf(portstr, "%s", client_payload);
                                 listing->port = atoi(portstr);
                                 listing->fd = new_fd;
-                				printf("clientip: %s\n", ip_addr);
+                				// printf("clientip: %s\n", ip_addr);
 
                                 int result = vec_insert_sorted(&clients, listing);
 
@@ -409,7 +411,7 @@ int main(int argc, char **argv)
                                 // printf("ub: %s\n", client_payload);
                                 char *client_ip = strtok(client_payload, " ");
                                 char *unblock_ip = strtok(NULL, "");
-                                printf("entering vec_unblock\n");
+                                // printf("entering vec_unblock\n");
                                 vec_unblock(&clients, client_ip, unblock_ip);
                                 vec_print_blocked(&clients, client_ip);
                             }
@@ -423,6 +425,7 @@ int main(int argc, char **argv)
         }   // end for
         vec_free(&clients);
         vecstr_free(&msgs);
+        vecstr_free(&msg_buffer);
 
     }
 
@@ -452,7 +455,7 @@ int main(int argc, char **argv)
 
         for(;;) {
 
-            write(1, prompt, strlen(prompt));
+            // write(1, prompt, strlen(prompt));
             memset(buf, '\0', sizeof(buf));
             read_fds = master;
             if(select(fd_max+1, &read_fds, NULL,\
@@ -509,7 +512,7 @@ int main(int argc, char **argv)
 
                             char *server_ip  = strtok(NULL, " ");
                             char *server_port = strtok(NULL, " ");
-                            printf("sip: %s\n", server_ip);
+                            // printf("sip: %s\n", server_ip);
                             if(!isValidIP(server_ip)) {
                                 cse4589_print_and_log("[%s:ERROR]\n", "LOGIN");
                                 cse4589_print_and_log("[%s:END]\n", "LOGIN");
@@ -565,7 +568,7 @@ int main(int argc, char **argv)
                             if(send(server_fd, payload, strlen(payload), 0) == -1) {
                                 perror("send");
                             }
-                            printf("sent: %s\n", payload);
+                            // printf("sent: %s\n", payload);
 
                         } else if(strcmp(token, "SEND")  == 0 && logged_in) {
                             // SEND <client-ip> <msg>
@@ -648,7 +651,7 @@ int main(int argc, char **argv)
                                 if(send(server_fd, payload, strlen(payload), 0) == -1) {
                                     perror("send");
                                 }
-                                printf("unblock: %s\n", payload);
+                                // printf("unblock: %s\n", payload);
                             }
 
                         } else if(strcmp(token, "LOGOUT") == 0) {
@@ -665,7 +668,7 @@ int main(int argc, char **argv)
                             if(close(server_fd) == -1) {
                                 perror("close");
                             }
-                            printf("cleared server_fd %d\n", server_fd);
+                            // printf("cleared server_fd %d\n", server_fd);
                             FD_CLR(server_fd, &master);
                             // server_fd = -1;
 
@@ -710,7 +713,7 @@ int main(int argc, char **argv)
                             FD_CLR(i, &master);
                         } else {
                             int len = strlen(buf);
-                            printf("recvd %d bytes: %s\n", nbytes, buf);
+                            // printf("recvd %d bytes: %s\n", nbytes, buf);
                             char server_payload[BUFSIZE] = "";
                             strncpy(server_payload, &(buf[2]), nbytes-2);
                             // char *head = strtok(buf, " ");
@@ -723,7 +726,7 @@ int main(int argc, char **argv)
                                 vec_free(&clients);
                                 vec_init(&clients);
                                 vec_create(&clients, server_payload);
-                                vec_print_list(&clients);
+                                // vec_print_list(&clients);
                                 // memset(clients, '\0', sizeof(clients));
                                 // strncpy(clients, server_payload, strlen(server_payload));
                                 // printf("%s", clients);

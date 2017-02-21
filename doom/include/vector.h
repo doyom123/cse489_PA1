@@ -49,6 +49,7 @@ void vec_print_statistic(Vector *vec);
 void vec_print_blocked(Vector *vec, char *address);
 void vec_clients(Vector *vec, char *str_array);
 void vec_block(Vector *vec, char *address, char *block_address);
+int  vec_is_blocked(Vector *vec, char *sender_address, int recvr_fd);
 void vec_unblock(Vector *vec, char *address, char *unblock_address);
 void vec_msg_sent(Vector *vec, char *address);
 void vec_msg_recv(Vector *vec, char *address);

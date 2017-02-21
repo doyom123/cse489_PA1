@@ -93,15 +93,15 @@ void vec_append(Vector *vec, Listing *l) {
 	// list->port = l.port;
 	// list->address = l.address;
 	vec->data[vec->size++] = l;
-	printf("insert completed");
+	// printf("insert completed");
 }
 
 void vec_create(Vector *vec, char *clients) {
-	printf("clients: %s\n", clients);
+	// printf("clients: %s\n", clients);
 	char *token = strtok(clients, "\n");
 	
 	while(token != NULL) {
-		printf("token: %s\n", token);
+		// printf("token: %s\n", token);
 		int num = 0;
 		char hostname[256];
 		char address[256];
@@ -127,7 +127,7 @@ int vec_insert_sorted(Vector *vec, Listing *l) {
 		if(strcmp(curr->address, l->address) == 0) {
 			char *status = "logged-in";
 			strncpy(curr->status, status, sizeof(curr->status));
-			printf("status: %s\n", curr->status);
+			// printf("status: %s\n", curr->status);
 			return 1;
 		}
 	}
@@ -214,7 +214,7 @@ void vec_unblock(Vector *vec, char *address, char *unblock_address) {
 			break; 
 		}
 	}
-	printf("finished vec_unblock");
+	// printf("finished vec_unblock");
 }
 
 void vec_msg_sent(Vector *vec, char *address) {
@@ -222,7 +222,7 @@ void vec_msg_sent(Vector *vec, char *address) {
 		Listing *curr = vec->data[i];
 		if(strcmp(curr->address, address) == 0) {
 			curr->msg_sent++;
-			printf("msg_sent: %d\n", curr->msg_sent);
+			// printf("msg_sent: %d\n", curr->msg_sent);
 			break;
 		}
 	}
@@ -232,7 +232,7 @@ void vec_msg_recv(Vector *vec, char *address) {
 		Listing *curr = vec->data[i];
 		if(strcmp(curr->address, address) == 0) {
 			curr->msg_recv++;
-			printf("msg_recv: %d\n", curr->msg_recv);
+			// printf("msg_recv: %d\n", curr->msg_recv);
 			break;
 		}
 	}
@@ -243,7 +243,7 @@ void vec_msg_recv_fd(Vector *vec, int fd) {
 		Listing *curr = vec->data[i];
 		if(curr->fd == fd) {
 			curr->msg_recv++;
-			printf("msg_recv: %d\n", curr->msg_recv);
+			// printf("msg_recv: %d\n", curr->msg_recv);
 			break;
 		}
 	}
@@ -293,6 +293,28 @@ void vec_print_statistic(Vector *vec) {
 	}
     cse4589_print_and_log("[%s:END]\n", "STATISTICS");
 }
+
+int vec_is_blocked(Vector *vec, char *sender_address, int recvr_fd) {
+	Vector *block_list;
+
+	for(int i = 0; i < vec->size; i++) {
+		Listing *curr = vec->data[i];
+		if(strcmp(curr->address, sender_address) == 0) {
+			block_list = curr->blocked;
+			break;
+		}
+	}
+	if(block_list != NULL) {
+		for(int i = 0; i < block_list->size; i++) {
+			Listing *curr = block_list->data[i];
+			if(curr->fd == recvr_fd) {
+				return 1;
+			}
+		}
+	}
+	return 0;
+}
+
 
 void vec_print_blocked(Vector *vec, char *address) {
 	// Check if valid IP
