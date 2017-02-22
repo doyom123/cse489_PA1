@@ -161,10 +161,6 @@ int main(int argc, char **argv)
         // vec_insert_sorted(&clients, &l2);
 
 
-        // List of messages
-        VectorStr msgs;
-        vecstr_init(&msgs);
-
         if(listen(fd, BACKLOG) != 0) {
             perror("listen");
             exit(EXIT_FAILURE);
@@ -286,7 +282,10 @@ int main(int argc, char **argv)
                                 int client_fd = vec_get_fd(&clients, client_ip);
                                 char *payload;
                                 // printf("clientfd: %d\n", client_fd);
+                                cse4589_print_and_log("[%s:SUCCESS]\n", "RELAYED");
                                 cse4589_print_and_log("msg from %s to: %s\n[msg]:%s\n", client_ip, "255.255.255.255", msg);
+                                cse4589_print_and_log("[%s:END]\n", "RELAYED");
+
                                 char to_client[512] = "";
                                 char *head = "ms";
                                 snprintf(to_client, sizeof(to_client), "%s%s %s", head, client_ip, msg);
@@ -424,7 +423,6 @@ int main(int argc, char **argv)
             }
         }   // end for
         vec_free(&clients);
-        vecstr_free(&msgs);
         vecstr_free(&msg_buffer);
 
     }
@@ -740,7 +738,7 @@ int main(int argc, char **argv)
                                 vec_free(&clients);
                                 vec_init(&clients);
                                 vec_create(&clients, server_payload);
-                                vec_print_list(&clients);
+                                // vec_print_list(&clients);
 
                                 cse4589_print_and_log("[%s:END]\n", "REFRESH");
                             }

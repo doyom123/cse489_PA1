@@ -199,6 +199,7 @@ void vec_block(Vector *vec, char *address, char *block_address) {
 			strcpy(new_listing->address, blocked_listing->address);
 			// new_listing->address = blocked_listing->address;
 			new_listing->port = blocked_listing->port;
+			new_listing->fd = blocked_listing->fd;
 			vec_insert_sorted(curr->blocked, new_listing);
 			// printf("blocked: %s\n", curr->blocked.data[0]);
 			break;
@@ -307,6 +308,7 @@ int vec_is_blocked(Vector *vec, char *sender_address, int recvr_fd) {
 	if(block_list != NULL) {
 		for(int i = 0; i < block_list->size; i++) {
 			Listing *curr = block_list->data[i];
+			printf("curr->fd: %d   recvr_fd: %d", curr->fd, recvr_fd);
 			if(curr->fd == recvr_fd) {
 				return 1;
 			}
