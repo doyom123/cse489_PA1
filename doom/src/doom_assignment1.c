@@ -377,8 +377,8 @@ int main(int argc, char **argv)
                                 }
                                 // printf("refresh fd: %d\n", client_fd);
                                 char *head = "re";
-                                char client_list[1024] = "";
-                                char payload[1024] = "";
+                                char client_list[2056] = "";
+                                char payload[2056] = "";
                                 vec_clients(&clients, client_list);
                                 snprintf(payload, sizeof(payload), "%s%s", head, client_list);
                                 if(send(client_fd, payload, strlen(payload), 0) == -1) {
@@ -556,8 +556,7 @@ int main(int argc, char **argv)
 
                         } else if(strcmp(token, "REFRESH") == 0 && logged_in) {
                             // REFRESH
-                            cse4589_print_and_log("[%s:SUCCESS]\n", "REFRESH");
-                            cse4589_print_and_log("[%s:END]\n", "REFRESH");
+               
 
 
                             char payload[256];
