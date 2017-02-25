@@ -157,8 +157,14 @@ int main(int argc, char **argv)
         // strcpy(l2.hostname, "test2");
         // strcpy(l2.address, "128.0.0.4");
         // l2.port = 5555;
+        // Listing l3;
+        // listing_init(&l3);
+        // strcpy(l3.hostname, "test3");
+        // strcpy(l3.address, "128.0.0.5");
+        // l3.port = 77777;
         // vec_insert_sorted(&clients, &l1);
         // vec_insert_sorted(&clients, &l2);
+        // vec_insert_sorted(&clients, &l3);
 
 
         if(listen(fd, BACKLOG) != 0) {
@@ -204,9 +210,9 @@ int main(int argc, char **argv)
                         // SHELL Commands
                         if(strcmp(token, "AUTHOR") == 0) {
                             // AUTHOR
-                            status = sprintf(msg, "I, %s, have read and understood the course academic integrity policy.", "doom");
+                            status = sprintf(msg, "I, %s, have read and understood the course academic integrity policy.\n", "doom");
                             cse4589_print_and_log("[%s:SUCCESS]\n", "AUTHOR");
-                            cse4589_print_and_log("AUTHOR:%s\n", msg);
+                            cse4589_print_and_log("%s\n", msg);
                             cse4589_print_and_log("[%s:END]\n", "AUTHOR");
                         } else if(strcmp(token, "IP") == 0) {
                             // IP
@@ -354,11 +360,12 @@ int main(int argc, char **argv)
                                 int result = vec_insert_sorted(&clients, listing);
 
                                 // Send client list
-                                char c_payload[1024] = "";
+                                char c_payload[2056] = "";
                                 char head[3] = "li";
-                                char client_list[1024] = "";
+                                char client_list[2056] = "";
                                 vec_clients(&clients, client_list);
                                 snprintf(c_payload, sizeof(c_payload),"%s%s", head, client_list);
+                                // printf("c_payload:\n%s\n", c_payload);
                                 if(send(new_fd, c_payload, strlen(c_payload), 0) == -1) {
                                     perror("send");
                                 }
@@ -381,9 +388,11 @@ int main(int argc, char **argv)
                                 char payload[2056] = "";
                                 vec_clients(&clients, client_list);
                                 snprintf(payload, sizeof(payload), "%s%s", head, client_list);
-                                if(send(client_fd, payload, strlen(payload), 0) == -1) {
+                                int n;
+                                if((n = send(client_fd, payload, strlen(payload), 0)) == -1) {
                                     perror("send");
                                 }
+                                // printf("sent bytes: %d\n", n);
                                 // printf("payload:\n%s\n", payload);
                             }
 
@@ -442,7 +451,7 @@ int main(int argc, char **argv)
         } 
 
         char msg[256];
-        char buf[BUFSIZE];
+        char buf[1024];
         int nbytes, new_fd;
         struct sockaddr_storage remoteaddr;
         socklen_t addrlen;
@@ -481,9 +490,9 @@ int main(int argc, char **argv)
 
                         if(strcmp(token, "AUTHOR") == 0) {
                             // AUTHOR
-                            status = sprintf(msg, "I, %s, have read and understood the course academic integrity policy.", "doom");
+                            status = sprintf(msg, "I, %s, have read and understood the course academic integrity policy.\n", "doom");
                             cse4589_print_and_log("[%s:SUCCESS]\n", "AUTHOR");
-                            cse4589_print_and_log("AUTHOR:%s\n", msg);
+                            cse4589_print_and_log("%s\n", msg);
                             cse4589_print_and_log("[%s:END]\n", "AUTHOR");
                         } else if(strcmp(token, "IP") == 0) {
                             // IP
@@ -709,6 +718,7 @@ int main(int argc, char **argv)
                             close(i);
                             FD_CLR(i, &master);
                         } else {
+                            // printf("nbytes = %d\n", nbytes);
                             int len = strlen(buf);
                             // printf("recvd %d bytes: %s\n", nbytes, buf);
                             char server_payload[BUFSIZE] = "";
@@ -736,6 +746,7 @@ int main(int argc, char **argv)
                                 // strncpy(clients, server_payload, strlen(server_payload));
                                 vec_free(&clients);
                                 vec_init(&clients);
+                                // printf("payload: %s\n", server_payload);
                                 vec_create(&clients, server_payload);
                                 // vec_print_list(&clients);
 
