@@ -307,12 +307,12 @@ int main(int argc, char **argv)
                                             } else {
                                                 vec_msg_sent(&clients, client_ip);
                                                 vec_msg_recv_fd(&clients, j);
-                                                // printf("fd: %d\nmsg: %s\n", j, msg);
+                                                printf("fd: %d\nmsg: %s\n", j, msg);
                                             }
                                             
                                         } else if(j != fd && j != client_fd && vec_is_blocked(&clients, client_ip, j) != 1 && vec_status(&clients, j) == 0) {
                                             // If client is not blocked and logged out, add msg to client msg buffer
-                                            printf("add msg to buffer\n");
+                                            printf("add msg to buffer for fd: %d msg: %s\n", j, msg);
                                             vec_add_msg(&clients, j, msg);
 
                                         }
@@ -807,7 +807,7 @@ int main(int argc, char **argv)
                                 cse4589_print_and_log("[%s:SUCCESS]\n", "RECEIVED");
 
                                 cse4589_print_and_log("msg from:%s\n[msg]:%s\n", ip, msg);
-                                cse4589_print_and_log("%s:END]", "RECEIVED");
+                                cse4589_print_and_log("[%s:END]", "RECEIVED");
 
                                 char *ak = "ak";
                                 send(server_fd, ak, sizeof(ak),0);

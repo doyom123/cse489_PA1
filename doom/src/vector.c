@@ -344,7 +344,7 @@ void vec_print_statistic(Vector *vec) {
 	cse4589_print_and_log("[%s:SUCCESS]\n", "STATISTICS");
 	for(int i = 0; i < vec->size; i++) {
 		Listing *curr = vec->data[i];
-		cse4589_print_and_log("%-5d%-35s%-8d%-8d%-8s\n", i+1, curr->hostname, curr->msg_sent, curr->msg_recv, curr->status);
+		cse4589_print_and_log("%-5d%-35s%-8d%-8d%-8s fd:%d\n", i+1, curr->hostname, curr->msg_sent, curr->msg_recv, curr->status, curr->fd);
 	}
     cse4589_print_and_log("[%s:END]\n", "STATISTICS");
 }
