@@ -152,6 +152,7 @@ int main(int argc, char **argv)
         // strcpy(l1.hostname, "test1");
         // strcpy(l1.address, "128.0.0.3");
         // l1.port = 8888;
+        // strcpy(l1.status, "logged-out");
         // Listing l2;
         // listing_init(&l2);
         // strcpy(l2.hostname, "test2");
@@ -295,9 +296,11 @@ int main(int argc, char **argv)
                                 char to_client[512] = "";
                                 char *head = "ms";
                                 snprintf(to_client, sizeof(to_client), "%s%s %s", head, client_ip, msg);
+                                vecstr_append(&msg_buffer, to_client);
                                 for(int j = 1; j <= fd_max; j++) {
                                     if(FD_ISSET(j, &master)) {
-                                        if(j != fd && j != client_fd && vec_is_blocked(&clients, client_ip, j) != 1) {
+                                        // if recvr is not blocked and not logged out
+                                        if(j != fd && j != client_fd && vec_is_blocked(&clients, client_ip, j) != 1 && vec_status(&clients, j) == 1) {
                                             if(send(j, to_client, strlen(to_client), 0) == -1) {
                                                 perror("send");
                                             } else {
@@ -306,9 +309,14 @@ int main(int argc, char **argv)
                                                 // printf("fd: %d\nmsg: %s\n", j, msg);
                                             }
                                             
-                                        } 
+                                        } else if(j != fd && j != client_fd && vec_is_blocked(&clients, client_ip, j) != 1 && vec_status(&clients, j) == 0) {
+                                            // If client is not blocked and logged out, add msg to client msg buffer
+                                            printf("add msg to buffer\n");
+
+                                        }
                                     }
                                 }
+                                vecstr_print(&msg_buffer);
                             }
                             // Check command received from client == SEND
                             if(strncmp("se", buf, 2) == 0) {
@@ -316,7 +324,7 @@ int main(int argc, char **argv)
                                 char *recvr_ip = strtok(NULL, " ");
                                 char *message = strtok(NULL, "");
                                 int len = strlen(message);                   
-                                char *head = "ms";             
+                                char *head = "ms";           
                                 // printf("ip: %s\nmessage: %s\n", client_ip, message);
                                 int recvr_fd = vec_get_fd(&clients, recvr_ip);
                                 // printf("recvr_fd: %d", recvr_fd);
@@ -351,7 +359,7 @@ int main(int argc, char **argv)
                                 // for localhost testing
                                 char ip_localhost[INET_ADDRSTRLEN] = "127.0.1.1";
                                 strncpy(listing->hostname, host, sizeof(listing->hostname));
-                                strncpy(listing->address, ip, sizeof(listing->address));
+                                strncpy(listing->address, ip_localhost, sizeof(listing->address));
                                 sprintf(portstr, "%s", client_payload);
                                 listing->port = atoi(portstr);
                                 listing->fd = new_fd;
@@ -372,6 +380,13 @@ int main(int argc, char **argv)
 
                                 if(result == 1) {
                                     // #TODO: send all buffered msgs to client
+                                    for(int i = 0; i < msg_buffer.size; i++) {
+                                        if(send(new_fd, msg_buffer.data[i], strlen(msg_buffer.data[i]), 0) == -1) {
+                                            perror("send");
+                                        }
+                                    }
+                                } else if(result == 0) {
+                                    // #TODO: print out from client buf messages
                                 }
                             }
 

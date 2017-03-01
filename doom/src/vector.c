@@ -10,7 +10,8 @@
 void vecstr_init(VectorStr *vs) {
 	vs->size = 0;
 	vs->capacity = INITIAL_CAPACITY;
-	vs->data = malloc(sizeof(256) * vs->capacity);
+	vs->data =  malloc(sizeof(512) * vs->capacity);
+	if(vs->data == NULL) return exit(1);
 }
 
 void vecstr_double_size_if_full(VectorStr *vs) {
@@ -20,13 +21,18 @@ void vecstr_double_size_if_full(VectorStr *vs) {
 	}
 }
 void vecstr_append(VectorStr *vs, char *address) {
-	for(int i = 0; i < vs->size; i++) {
-		if(strcmp(vs->data[i], address) == 0) {
-			return;
-		}
-	}
+	// printf("vsappend start");
+	// for(int i = 0; i < vs->size; i++) {
+	// 	printf("append %d: %s\n", i, vs->data[i]);
+	// 	if(strcmp(vs->data[i], address) == 0) {
+	// 		return;
+	// 	}
+	// }
 	vecstr_double_size_if_full(vs);
-	vs->data[vs->size++] = address;
+	char *temp = strdup(address);
+	vs->data[vs->size] = temp;
+	// strcpy(vs->data[vs->size], address);
+	vs->size++;
 }
 
 int vecstr_find(VectorStr *vs, char *address) {
@@ -52,7 +58,17 @@ void vecstr_remove(VectorStr *vs, char *address) {
 }
 
 void vecstr_free(VectorStr *vs) {
+	for(int i = 0; i < vs->size; i++) {
+		free(vs->data[i]);
+	}
 	free(vs->data);
+}
+
+void vecstr_print(VectorStr *vs) {
+	for(int i = 0; i < vs->size; i++) {
+
+		printf("%s\n", vs->data[i]);
+	}
 }
 
 
@@ -174,6 +190,40 @@ void vec_remove(Vector *vec, char *address) {
 		vec->size--;
 	}
 }
+
+void vec_add_msg(Vector *vec, int recvr_fd, char *msg) {
+	Listing *curr;
+	for(int i = 0; i < vec->size; i++) {
+		curr = vec->data[i];
+		if(recvr_fd == curr->fd) {
+			break;
+		}
+	}
+
+	if(curr != NULL) {
+		vecstr_append(&curr->buf_msg, msg);
+	}
+}
+
+int vec_status(Vector *vec, int fd) {
+	// Return 1 if logged in, 0 if logged out
+	printf("checking status\n");
+	Listing  *curr;
+	for(int i = 0; i < vec->size; i++) {
+		curr = vec->data[i];
+		if(fd == curr->fd) {
+			break;
+		}
+	}
+
+	if(curr != NULL) {
+		if(strcmp(curr->status, "logged-in") == 0) {
+			return 1;
+		}
+		return 0;
+	}
+}
+
 
 void vec_block(Vector *vec, char *address, char *block_address) {
 	int block_address_index = -1;
