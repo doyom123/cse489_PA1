@@ -359,7 +359,7 @@ int main(int argc, char **argv)
                                 // for localhost testing
                                 char ip_localhost[INET_ADDRSTRLEN] = "127.0.1.1";
                                 strncpy(listing->hostname, host, sizeof(listing->hostname));
-                                strncpy(listing->address, ip_localhost, sizeof(listing->address));
+                                strncpy(listing->address, ip, sizeof(listing->address));
                                 sprintf(portstr, "%s", client_payload);
                                 listing->port = atoi(portstr);
                                 listing->fd = new_fd;
@@ -380,13 +380,16 @@ int main(int argc, char **argv)
 
                                 if(result == 1) {
                                     // #TODO: send all buffered msgs to client
+                                    printf("result == 1 send all buffered msgs\n");
                                     for(int i = 0; i < msg_buffer.size; i++) {
                                         if(send(new_fd, msg_buffer.data[i], strlen(msg_buffer.data[i]), 0) == -1) {
                                             perror("send");
                                         }
+                                        printf("sent: %s\n", msg_buffer.data[i]);
                                     }
-                                } else if(result == 0) {
+                                } else if(result == 2) {
                                     // #TODO: print out from client buf messages
+                                    printf("result == 2 print out from client buf msgs\n");
                                 }
                             }
 

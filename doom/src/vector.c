@@ -144,7 +144,7 @@ int vec_insert_sorted(Vector *vec, Listing *l) {
 			char *status = "logged-in";
 			strncpy(curr->status, status, sizeof(curr->status));
 			// printf("status: %s\n", curr->status);
-			return 1;
+			return 2;
 		}
 	}
 
@@ -153,7 +153,7 @@ int vec_insert_sorted(Vector *vec, Listing *l) {
 	if(vec->size == 0) {
 		vec->data[0] = l;
 		vec->size++;
-		return 2;
+		return 1;
 	}
 
 	int port = l->port;
@@ -170,7 +170,7 @@ int vec_insert_sorted(Vector *vec, Listing *l) {
 	}
 	vec->data[insertion_index] = l;
 	vec->size++;
-	return 2;
+	return 1;
 }
 
 void vec_remove(Vector *vec, char *address) {
