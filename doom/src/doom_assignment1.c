@@ -299,8 +299,8 @@ int main(int argc, char **argv)
                                 char buf_msg[512] = "";
                                 vecstr_append(&msg_buffer, to_client);
                                 for(int j = 1; j <= fd_max; j++) {
-                                    printf("j: %d\n", j);
                                     if(FD_ISSET(j, &master)) {
+                                        printf("j: %d\n", j);
                                         // if recvr is not blocked and not logged out
                                         if(j != fd && j != client_fd && vec_is_blocked(&clients, client_ip, j) != 1 && vec_status(&clients, j) == 1) {
                                             if(send(j, to_client, strlen(to_client), 0) == -1) {
@@ -362,7 +362,7 @@ int main(int argc, char **argv)
                                 // for localhost testing
                                 char ip_localhost[INET_ADDRSTRLEN] = "127.0.1.1";
                                 strncpy(listing->hostname, host, sizeof(listing->hostname));
-                                strncpy(listing->address, ip, sizeof(listing->address));
+                                strncpy(listing->address, ip_localhost, sizeof(listing->address));
                                 sprintf(portstr, "%s", client_payload);
                                 listing->port = atoi(portstr);
                                 listing->fd = new_fd;
@@ -466,6 +466,10 @@ int main(int argc, char **argv)
                                 vec_print_blocked(&clients, client_ip);
                             }
 
+                            if(strncmp("rl",buf, 2) == 0) {
+                                vec_login(&clients, client_payload);
+                            }
+
                         }
 
                     }
@@ -558,9 +562,16 @@ int main(int argc, char **argv)
 
                         if(strcmp(token, "LOGIN") == 0 && logged_in == false) {
                             // LOGIN <server-ip> <server-port>
-
                             char *server_ip  = strtok(NULL, " ");
                             char *server_port = strtok(NULL, " ");
+                            if(server_fd != -1) {
+                                logged_in == true;
+                                char payload[256] = "";
+                                char *head = "rl";
+                                snprintf(payload, sizeof(payload), "%s%s", head, server_ip);
+                                send(server_fd, payload, strlen(payload), 0);
+                                break;
+                            }
                             // printf("sip: %s\n", server_ip);
                             if(!isValidIP(server_ip)) {
                                 cse4589_print_and_log("[%s:ERROR]\n", "LOGIN");
@@ -713,11 +724,11 @@ int main(int argc, char **argv)
                                 perror("send");
                             }
 
-                            if(close(server_fd) == -1) {
-                                perror("close");
-                            }
+                            // if(close(server_fd) == -1) {
+                            //     perror("close");
+                            // }
                             // printf("cleared server_fd %d\n", server_fd);
-                            FD_CLR(server_fd, &master);
+                            // FD_CLR(server_fd, &master);
                             // server_fd = -1;
 
                             logged_in = false;

@@ -443,6 +443,17 @@ void vec_logout(Vector *vec, char *address) {
 	}
 }
 
+void vec_login(Vector *vec, char *address) {
+	for(int i = 0; i < vec->size; i++) {
+		if(strcmp(vec->data[i]->address, address) == 0) {
+			char *status = "logged-in";
+			memset(vec->data[i]->status, 0, sizeof(vec->data[i]->status));
+			strncpy(vec->data[i]->status, status, sizeof(vec->data[i]->status));
+			break;
+		}
+	}
+}
+
 bool inClients(Vector *clients, const char *address) {
 	for(int i = 0; i < clients->size; i++) {
 		Listing *curr = clients->data[i];

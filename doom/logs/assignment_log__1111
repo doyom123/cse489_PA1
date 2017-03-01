@@ -1,6 +1,7 @@
 [LOGIN:SUCCESS]
 [LOGIN:END]
+[LIST:SUCCESS]
+1    localhost                          127.0.1.1           1111    
+[LIST:END]
 [LOGOUT:SUCCESS]
 [LOGOUT:END]
-[LOGIN:SUCCESS]
-[LOGIN:END]

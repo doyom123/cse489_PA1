@@ -60,6 +60,7 @@ void vec_msg_recv_fd(Vector *vec, int fd);
 void vec_append(Vector *vec, Listing *l);
 void vec_free(Vector *vec);
 void vec_remove(Vector *vec, char *address);
+void vec_login(Vector *vec, char *address);
 void vec_logout(Vector *vec, char *address);
 int vec_insert_sorted(Vector *vec, Listing *l);
 Listing vec_get(Vector *vec, int index);
