@@ -382,7 +382,7 @@ int main(int argc, char **argv)
 
                                 if(result == -1) {
                                     // #TODO: send all buffered msgs to client
-                                    printf("result == 1 send all buffered msgs\n");
+                                    printf("result == -1 send all buffered msgs\n");
                                     for(int i = 0; i < msg_buffer.size; i++) {
                                         if(send(new_fd, msg_buffer.data[i], strlen(msg_buffer.data[i]), 0) == -1) {
                                             perror("send");

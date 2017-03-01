@@ -155,7 +155,7 @@ int vec_insert_sorted(Vector *vec, Listing *l) {
 	if(vec->size == 0) {
 		vec->data[0] = l;
 		vec->size++;
-		return 1;
+		return -1;
 	}
 
 	int port = l->port;
@@ -172,7 +172,7 @@ int vec_insert_sorted(Vector *vec, Listing *l) {
 	}
 	vec->data[insertion_index] = l;
 	vec->size++;
-	return 1;
+	return -1;
 }
 
 void vec_remove(Vector *vec, char *address) {
