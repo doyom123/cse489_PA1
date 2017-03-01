@@ -568,7 +568,7 @@ int main(int argc, char **argv)
                                 logged_in == true;
                                 char payload[256] = "";
                                 char *head = "rl";
-                                snprintf(payload, sizeof(payload), "%s%s", head, server_ip);
+                                snprintf(payload, sizeof(payload), "%s%s", head, ip_addr);
                                 send(server_fd, payload, strlen(payload), 0);
                                 break;
                             }
