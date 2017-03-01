@@ -91,7 +91,8 @@ void vec_init(Vector *vec) {
 	vec->size = 0;
 	vec->num_loggedin = 0;
 	vec->capacity = INITIAL_CAPACITY;
-	vec->data = malloc(sizeof(Listing *) * vec->capacity);	
+	vec->data = malloc(sizeof(Listing *) * vec->capacity);
+
 }
 
 void vec_double_size_if_full(Vector *vec) {
@@ -202,7 +203,8 @@ void vec_add_msg(Vector *vec, int recvr_fd, char *msg) {
 	}
 
 	if(curr != NULL) {
-		vecstr_append(&curr->buf_msg, msg);
+		printf("append msg: %s", msg);
+		vecstr_append(&(curr->buf_msg), msg);
 	}
 }
 

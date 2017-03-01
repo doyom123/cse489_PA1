@@ -394,8 +394,10 @@ int main(int argc, char **argv)
                                     }
                                 } else {
                                     // #TODO: print out from client buf messages
-                                    printf("result == 2 print out from client buf msgs\n");
+                                    printf("result != -1 print out from client buf msgs\n");
                                     VectorStr vs = clients.data[result]->buf_msg;
+                                    printf("vs.size: %d", vs.size);
+                                    printf("entering for loop\n");
                                     for(int i = 0; i < vs.size; i++) {
                                         if(send(new_fd, vs.data[i], strlen(vs.data[i]), 0) == -1) {
                                             perror("send");
