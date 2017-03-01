@@ -380,7 +380,7 @@ int main(int argc, char **argv)
                                     perror("send");
                                 }
 
-                                if(result == 1) {
+                                if(result == -1) {
                                     // #TODO: send all buffered msgs to client
                                     printf("result == 1 send all buffered msgs\n");
                                     for(int i = 0; i < msg_buffer.size; i++) {
@@ -802,7 +802,11 @@ int main(int argc, char **argv)
                                 char *ip = strtok(server_payload, " ");
                                 char *msg = strtok(NULL, "");
                                 // printf("pay: %s\nip: %s\nmsg:%s\n", buf, ip, msg);
+                                cse4589_print_and_log("[%s:SUCCESS]\n", "RECEIVED");
+
                                 cse4589_print_and_log("msg from:%s\n[msg]:%s\n", ip, msg);
+                                cse4589_print_and_log("%s:END]", "RECEIVED");
+
                                 char *ak = "ak";
                                 send(server_fd, ak, sizeof(ak),0);
                                 // printf("sent %s\n", ak);
