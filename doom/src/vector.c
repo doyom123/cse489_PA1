@@ -348,7 +348,8 @@ void vec_print_statistic(Vector *vec) {
 	}
     cse4589_print_and_log("[%s:END]\n", "STATISTICS");
 }
-
+// Return 1 if blocked
+// 0 if not blocked
 int vec_is_blocked(Vector *vec, char *sender_address, int recvr_fd) {
 	Vector *block_list;
 

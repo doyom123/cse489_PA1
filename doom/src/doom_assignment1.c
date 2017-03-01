@@ -299,6 +299,7 @@ int main(int argc, char **argv)
                                 char buf_msg[512] = "";
                                 vecstr_append(&msg_buffer, to_client);
                                 for(int j = 1; j <= fd_max; j++) {
+                                    printf("j: %d\n", j);
                                     if(FD_ISSET(j, &master)) {
                                         // if recvr is not blocked and not logged out
                                         if(j != fd && j != client_fd && vec_is_blocked(&clients, client_ip, j) != 1 && vec_status(&clients, j) == 1) {
