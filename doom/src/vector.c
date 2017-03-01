@@ -135,7 +135,7 @@ void vec_create(Vector *vec, char *clients) {
 }
 
 // New login return 1
-// exisintg  return 2
+// exisintg  return i
 int vec_insert_sorted(Vector *vec, Listing *l) {
 	// check if already in vec
 	for(int i = 0; i < vec->size; i++) {
@@ -144,7 +144,7 @@ int vec_insert_sorted(Vector *vec, Listing *l) {
 			char *status = "logged-in";
 			strncpy(curr->status, status, sizeof(curr->status));
 			// printf("status: %s\n", curr->status);
-			return 2;
+			return i;
 		}
 	}
 

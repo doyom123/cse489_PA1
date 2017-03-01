@@ -313,11 +313,12 @@ int main(int argc, char **argv)
                                         } else if(j != fd && j != client_fd && vec_is_blocked(&clients, client_ip, j) != 1 && vec_status(&clients, j) == 0) {
                                             // If client is not blocked and logged out, add msg to client msg buffer
                                             printf("add msg to buffer\n");
+                                            vec_add_msg(&clients, j, msg);
 
                                         }
                                     }
                                 }
-                                vecstr_print(&msg_buffer);
+                                // vecstr_print(&msg_buffer);
                             }
                             // Check command received from client == SEND
                             if(strncmp("se", buf, 2) == 0) {
@@ -391,9 +392,25 @@ int main(int argc, char **argv)
                                         recv(new_fd, msg_ak, sizeof(msg_ak), 0);
                                         printf("received ak: %s\n", msg_ak);
                                     }
-                                } else if(result == 2) {
+                                } else {
                                     // #TODO: print out from client buf messages
                                     printf("result == 2 print out from client buf msgs\n");
+                                    VectorStr vs = clients.data[result]->buf_msg;
+                                    for(int i = 0; i < vs.size; i++) {
+                                        if(send(new_fd, vs.data[i], strlen(vs.data[i]), 0) == -1) {
+                                            perror("send");
+                                        }
+                                        printf("sent: %s\n", vs.data[i]);
+                                        char msg_ak[10];
+                                        recv(new_fd, msg_ak, sizeof(msg_ak), 0);
+                                        printf("received ak: %s\n", msg_ak);
+                                    }
+                                    for(int i = 0; i < vs.size; i++) {
+                                        free(vs.data[i]);
+                                    }
+                                    vs.size = 0;
+
+
                                 }
                             }
 
@@ -788,7 +805,7 @@ int main(int argc, char **argv)
                                 cse4589_print_and_log("msg from:%s\n[msg]:%s\n", ip, msg);
                                 char *ak = "ak";
                                 send(server_fd, ak, sizeof(ak),0);
-                                printf("sent %s\n", ak);
+                                // printf("sent %s\n", ak);
                             }
                         }
 
