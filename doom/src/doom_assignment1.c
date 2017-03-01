@@ -296,6 +296,7 @@ int main(int argc, char **argv)
                                 char to_client[512] = "";
                                 char *head = "ms";
                                 snprintf(to_client, sizeof(to_client), "%s%s %s", head, client_ip, msg);
+                                char buf_msg[512] = "";
                                 vecstr_append(&msg_buffer, to_client);
                                 for(int j = 1; j <= fd_max; j++) {
                                     if(FD_ISSET(j, &master)) {
@@ -386,6 +387,9 @@ int main(int argc, char **argv)
                                             perror("send");
                                         }
                                         printf("sent: %s\n", msg_buffer.data[i]);
+                                        char msg_ak[10];
+                                        recv(new_fd, msg_ak, sizeof(msg_ak), 0);
+                                        printf("received ak: %s\n", msg_ak);
                                     }
                                 } else if(result == 2) {
                                     // #TODO: print out from client buf messages
@@ -782,6 +786,9 @@ int main(int argc, char **argv)
                                 char *msg = strtok(NULL, "");
                                 // printf("pay: %s\nip: %s\nmsg:%s\n", buf, ip, msg);
                                 cse4589_print_and_log("msg from:%s\n[msg]:%s\n", ip, msg);
+                                char *ak = "ak";
+                                send(server_fd, ak, sizeof(ak),0);
+                                printf("sent %s\n", ak);
                             }
                         }
 
