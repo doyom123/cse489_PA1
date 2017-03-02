@@ -261,7 +261,7 @@ int main(int argc, char **argv)
                         // vec_print_list(&clients);
                         char payload[512];
                         int nbytes;
-                        if( (nbytes = recv(i, buf, BUFSIZE, 0)) <= 0) {
+                        if( (nbytes = recv(i, buf, 512, 0)) <= 0) {
                             if(nbytes == 0) {
 
                             } else {
@@ -713,7 +713,7 @@ int main(int argc, char **argv)
                             snprintf(payload, sizeof(payload), "%s%s %s", head, ip_addr, message);
                             if(server_fd != -1) {
                                 // Send to server
-                                if(send(server_fd, payload, strlen(payload), 0) == -1) {
+                                if(send(server_fd, payload, sizeof(payload), 0) == -1) {
                                     perror("send");
                                 }
                                 // write(1, message, len);
