@@ -463,7 +463,7 @@ int main(int argc, char **argv)
                                 char *block_ip = strtok(NULL, "");
 
                                 vec_block(&clients, client_ip, block_ip);
-                                vec_print_blocked(&clients, client_ip);
+                                // vec_print_blocked(&clients, client_ip);
                             }
 
                             if(strncmp("ub", buf, 2) == 0) {
@@ -472,7 +472,7 @@ int main(int argc, char **argv)
                                 char *unblock_ip = strtok(NULL, "");
                                 // printf("entering vec_unblock\n");
                                 vec_unblock(&clients, client_ip, unblock_ip);
-                                vec_print_blocked(&clients, client_ip);
+                                // vec_print_blocked(&clients, client_ip);
                             }
 
                             if(strncmp("rl",buf, 2) == 0) {
@@ -703,7 +703,7 @@ int main(int argc, char **argv)
                             char *client_ip = strtok(NULL, " ");
                             char payload[256] = "";
                             char *head = "ub";
-                            if(!isValidIP(client_ip) || !inClients(&clients, client_ip) || isBlocked(&clients, ip_addr, client_ip)) {
+                            if(!isValidIP(client_ip) || !inClients(&clients, client_ip) || !isBlocked(&clients, ip_addr, client_ip)) {
                                 cse4589_print_and_log("[%s:ERROR]\n", "UNBLOCK");
                                 cse4589_print_and_log("[%s:END]\n", "UNBLOCK");
                             } else {
