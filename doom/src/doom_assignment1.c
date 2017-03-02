@@ -298,7 +298,7 @@ int main(int argc, char **argv)
                                 snprintf(to_client, sizeof(to_client), "%s%s %s", head, client_ip, msg);
                                 char buf_msg[512] = "";
                                 vecstr_append(&msg_buffer, to_client);
-                                for(int j = 1; j <= fd_max; j++) {
+                                for(int j = 4; j <= fd_max; j++) {
                                     // if(FD_ISSET(j, &master)) {
                                         printf("j: %d\n", j);
                                         // if recvr is not blocked and not logged out
@@ -313,8 +313,8 @@ int main(int argc, char **argv)
                                             
                                         } else if(j != fd && j != client_fd && vec_is_blocked(&clients, client_ip, j) != 1 && vec_status(&clients, j) == 0) {
                                             // If client is not blocked and logged out, add msg to client msg buffer
-                                            printf("add msg to buffer for fd: %d msg: %s\n", j, msg);
-                                            vec_add_msg(&clients, j, msg);
+                                            printf("add msg to buffer for fd: %d msg: %s\n", j, to_client);
+                                            vec_add_msg(&clients, j, to_client);
 
                                         }
                                     // }
@@ -822,7 +822,9 @@ int main(int argc, char **argv)
                                 cse4589_print_and_log("[%s:END]", "RECEIVED");
 
                                 char *ak = "ak";
-                                send(server_fd, ak, sizeof(ak),0);
+                                if(send(server_fd, ak, sizeof(ak),0) == -1) {
+                                    perror("send");
+                                }
                                 // printf("sent %s\n", ak);
                             }
                         }
