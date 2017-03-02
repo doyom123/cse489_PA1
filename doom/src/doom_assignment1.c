@@ -290,7 +290,7 @@ int main(int argc, char **argv)
                                 char *payload;
                                 // printf("clientfd: %d\n", client_fd);
                                 cse4589_print_and_log("[%s:SUCCESS]\n", "RELAYED");
-                                cse4589_print_and_log("msg from:%s,to:%s\n[msg]:%s\n", client_ip, "255.255.255.255", msg);
+                                cse4589_print_and_log("msg from:%s, to:%s\n[msg]:%s\n", client_ip, "255.255.255.255", msg);
                                 cse4589_print_and_log("[%s:END]\n", "RELAYED");
 
                                 char to_client[512] = "";
@@ -339,7 +339,7 @@ int main(int argc, char **argv)
                                         perror("send");
                                     } else {
                                         // printf("sent %d bytes to fd=%d: %s\n", len, recvr_fd, message); 
-                                        cse4589_print_and_log("msg from:%s,to:%s\n[msg]:%s\n", client_ip, recvr_ip, message);
+                                        cse4589_print_and_log("msg from:%s, to:%s\n[msg]:%s\n",, client_ip, recvr_ip, message);
                                         vec_msg_sent(&clients, client_ip);
                                         vec_msg_recv(&clients, recvr_ip);
                                     }
