@@ -464,7 +464,7 @@ int main(int argc, char **argv)
 
                                 char *head = "bs";
                                 char payload[256] = "";
-                                int block_fd = vec_get_fd(&clients, block_ip);
+                                // int block_fd = vec_get_fd(&clients, block_ip);
                                 int client_fd = vec_get_fd(&clients, client_ip);
                                 if(vec_is_blocked(&clients, block_ip, client_fd) == 1) {
                                     snprintf(payload, sizeof(payload), "%s%s", head, "fail");
@@ -472,7 +472,9 @@ int main(int argc, char **argv)
                                     vec_block(&clients, client_ip, block_ip);
                                     snprintf(payload, sizeof(payload), "%s%s", head, "success");
                                 }
-                                send(client_fd, payload, strlen(payload), 0);
+                                if(send(client_fd, payload, strlen(payload), 0) == -1) {
+                                    perror("send");
+                                }
 
                                 // vec_print_blocked(&clients, client_ip);
                             }
@@ -482,7 +484,18 @@ int main(int argc, char **argv)
                                 char *client_ip = strtok(client_payload, " ");
                                 char *unblock_ip = strtok(NULL, "");
                                 // printf("entering vec_unblock\n");
-                                vec_unblock(&clients, client_ip, unblock_ip);
+                                char *head = "us";
+                                char payload[256] = "";
+                                int client_fd = vec_get_fd(&clients, client_ip);
+                                if(vec_is_blocked(&clients, unblock_ip, client_fd) != 1) {
+                                    snprintf(payload, sizeof(payload), "%s%s", head, "fail");
+                                } else {
+                                    vec_unblock(&clients, client_ip, unblock_ip);
+                                    snprintf(payload, sizeof(payload), "%s%s", head, "success");
+                                }
+                                if(send(client_fd, payload, strlen(payload), 0) == -1) {
+                                    perror("send");
+                                }
                                 // vec_print_blocked(&clients, client_ip);
                             }
 
@@ -712,7 +725,7 @@ int main(int argc, char **argv)
                             char *client_ip = strtok(NULL, " ");
                             char payload[256] = "";
                             char *head = "ub";
-                            if(!isValidIP(client_ip) || !inClients(&clients, client_ip) || !isBlocked(&clients, ip_addr, client_ip)) {
+                            if(!isValidIP(client_ip) || !inClients(&clients, client_ip)) {
                                 cse4589_print_and_log("[%s:ERROR]\n", "UNBLOCK");
                                 cse4589_print_and_log("[%s:END]\n", "UNBLOCK");
                             } else {
@@ -720,8 +733,8 @@ int main(int argc, char **argv)
                                 if(send(server_fd, payload, strlen(payload), 0) == -1) {
                                     perror("send");
                                 }
-                                cse4589_print_and_log("[%s:SUCCESS]\n", "UNBLOCK");
-                                cse4589_print_and_log("[%s:END]\n", "UNBLOCK");
+                                // cse4589_print_and_log("[%s:SUCCESS]\n", "UNBLOCK");
+                                // cse4589_print_and_log("[%s:END]\n", "UNBLOCK");
                                 // printf("unblock: %s\n", payload);
                             }
 
@@ -844,6 +857,15 @@ int main(int argc, char **argv)
                                 } else {
                                     cse4589_print_and_log("[%s:SUCCESS]\n", "BLOCK");
                                     cse4589_print_and_log("[%s:END]\n", "BLOCK");
+
+                                }
+                            } else if(strncmp("us", buf, 2) == 0) {
+                                if(strcmp(server_payload, "fail") == 0) {
+                                    cse4589_print_and_log("[%s:ERROR]\n", "UNBLOCK");
+                                    cse4589_print_and_log("[%s:END]\n", "UNBLOCK");
+                                } else {
+                                    cse4589_print_and_log("[%s:SUCCESS]\n", "UNBLOCK");
+                                    cse4589_print_and_log("[%s:END]\n", "UNBLOCK");
 
                                 }
                             }
