@@ -352,11 +352,11 @@ void vec_print_statistic(Vector *vec) {
 // Return 1 if blocked
 // 0 if not blocked
 int vec_is_blocked(Vector *vec, char *sender_address, int recvr_fd) {
-	Vector *block_list;
+	Vector *block_list = NULL;
 
 	for(int i = 0; i < vec->size; i++) {
 		Listing *curr = vec->data[i];
-		if(strcmp(curr->address, sender_address) == 0) {
+		if(curr->fd == recvr_fd) {
 			block_list = curr->blocked;
 			break;
 		}
@@ -365,7 +365,7 @@ int vec_is_blocked(Vector *vec, char *sender_address, int recvr_fd) {
 		for(int i = 0; i < block_list->size; i++) {
 			Listing *curr = block_list->data[i];
 			printf("curr->fd: %d   recvr_fd: %d", curr->fd, recvr_fd);
-			if(curr->fd == recvr_fd) {
+			if(strcmp(curr->address, sender_address) == 0) {
 				return 1;
 			}
 		}
