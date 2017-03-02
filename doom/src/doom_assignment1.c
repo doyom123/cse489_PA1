@@ -301,7 +301,7 @@ int main(int argc, char **argv)
                                 for(int j = 4; j <= fd_max; j++) {
                                     // if(FD_ISSET(j, &master)) {
                                         printf("j: %d\n", j);
-                                        // if recvr is not blocked and not logged out
+                                        // if recvr is not blocked and logged in
                                         if(j != fd && j != client_fd && vec_is_blocked(&clients, client_ip, j) != 1 && vec_status(&clients, j) == 1) {
                                             if(send(j, to_client, strlen(to_client), 0) == -1) {
                                                 perror("send");
@@ -333,7 +333,8 @@ int main(int argc, char **argv)
                                 // printf("recvr_fd: %d", recvr_fd);
                                 char to_client[512] = "";
                                 snprintf(to_client, sizeof(to_client), "%s%s %s", head, client_ip, message);
-                                if(recvr_fd >= 0 && vec_is_blocked(&clients, client_ip, recvr_fd) != 1) {
+                                // if recvr exists and is not blocked and is logged in
+                                if(recvr_fd >= 0 && vec_is_blocked(&clients, client_ip, recvr_fd) != 1 && vec_status(&clients, recvr_fd) == 1) {
                                     if(send(recvr_fd, to_client, strlen(to_client), 0) == -1) {
                                         perror("send");
                                     } else {
@@ -342,6 +343,10 @@ int main(int argc, char **argv)
                                         vec_msg_sent(&clients, client_ip);
                                         vec_msg_recv(&clients, recvr_ip);
                                     }
+                                } else if(recvr_fd >= 0 && vec_is_blocked(&clients, client_ip, recvr_fd) != 1 && vec_status(&clients, recvr_fd) == 0) {
+                                    // if recvr exists and is not blocked and is not logged in
+                                    // then save to recvr's msg buffer
+                                    vec_add_msg(&clients, recvr_fd, to_client);
                                 }
                             } 
                             // After login, receive and assign client listening port
