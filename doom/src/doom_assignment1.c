@@ -284,8 +284,8 @@ int main(int argc, char **argv)
                             // BROADCAST
                             if(strncmp("br", buf, 2) == 0) {
                                 // printf("brconfirmed\n");
-                                printf("buf: %s\n", buf);
-                                printf("client_payload: %s\n", client_payload);
+                                // printf("buf: %s\n", buf);
+                                // printf("client_payload: %s\n", client_payload);
 
                                 char *client_ip = strtok(client_payload, " ");
                                 char *msg = strtok(NULL, "");
@@ -703,7 +703,7 @@ int main(int argc, char **argv)
                             if(msglen > 255) {
                                 message[255] = 0;
                             }
-                            printf("message: %s\n", message);
+                            // printf("message: %s\n", message);
 
                             cse4589_print_and_log("[%s:SUCCESS]\n", "BROADCAST");
                             // cse4589_print_and_log(“BROADCAST:%s\n”, ip_addr);
