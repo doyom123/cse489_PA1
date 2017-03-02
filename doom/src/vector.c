@@ -383,7 +383,7 @@ void vec_print_blocked(Vector *vec, char *address) {
 	}
 
 
-	Vector *vs;
+	Vector *vs = NULL;
 
 	for(int i = 0; i < vec->size; i++) {
 		Listing *curr = vec->data[i];

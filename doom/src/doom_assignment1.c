@@ -664,7 +664,7 @@ int main(int argc, char **argv)
 
                             cse4589_print_and_log("[%s:SUCCESS]\n", "BROADCAST");
                             // cse4589_print_and_log(“BROADCAST:%s\n”, ip_addr);
-                            cse4589_print_and_log("%s\n", message);
+                            // cse4589_print_and_log("%s\n", message);
                             cse4589_print_and_log("[%s:END]\n", "BROADCAST");
 
                             snprintf(payload, sizeof(payload), "%s%s %s", head, ip_addr, message);
@@ -682,7 +682,7 @@ int main(int argc, char **argv)
                             char *client_ip = strtok(NULL, " ");
                             char payload[256] = "";
                             char *head = "bl";
-                            if(!isValidIP(client_ip) || !inClients(&clients, client_ip)) {
+                            if(!isValidIP(client_ip) || !inClients(&clients, client_ip) || isBlocked(&clients, ip_addr, client_ip)) {
                                 cse4589_print_and_log("[%s:ERROR]\n", "BLOCK");
                                 cse4589_print_and_log("[%s:END]\n", "BLOCK");
                             } else {
