@@ -462,7 +462,18 @@ int main(int argc, char **argv)
                                 char *client_ip = strtok(client_payload, " ");
                                 char *block_ip = strtok(NULL, "");
 
-                                vec_block(&clients, client_ip, block_ip);
+                                char *head = "bs";
+                                char payload[256] = "";
+                                int block_fd = vec_get_fd(&clients, block_ip);
+                                int client_fd = vec_get_fd(&clients, client_ip);
+                                if(vec_is_blocked(&clients, block_ip, client_fd) == 1) {
+                                    snprintf(payload, sizeof(payload), "%s%s", head, "fail");
+                                } else {
+                                    vec_block(&clients, client_ip, block_ip);
+                                    snprintf(payload, sizeof(payload), "%s%s", head, "success");
+                                }
+                                send(client_fd, payload, strlen(payload), 0);
+
                                 // vec_print_blocked(&clients, client_ip);
                             }
 
@@ -682,7 +693,7 @@ int main(int argc, char **argv)
                             char *client_ip = strtok(NULL, " ");
                             char payload[256] = "";
                             char *head = "bl";
-                            if(!isValidIP(client_ip) || !inClients(&clients, client_ip) || isBlocked(&clients, ip_addr, client_ip)) {
+                            if(!isValidIP(client_ip) || !inClients(&clients, client_ip)) {
                                 cse4589_print_and_log("[%s:ERROR]\n", "BLOCK");
                                 cse4589_print_and_log("[%s:END]\n", "BLOCK");
                             } else {
@@ -691,8 +702,8 @@ int main(int argc, char **argv)
                                     perror("send");
                                 }
                                 // printf("block: %s\n", payload);
-                                cse4589_print_and_log("[%s:SUCCESS]\n", "BLOCK");
-                                cse4589_print_and_log("[%s:END]\n", "BLOCK");
+                                // cse4589_print_and_log("[%s:SUCCESS]\n", "BLOCK");
+                                // cse4589_print_and_log("[%s:END]\n", "BLOCK");
                             }
 
                         } else if(strcmp(token, "UNBLOCK") == 0) {
@@ -826,6 +837,15 @@ int main(int argc, char **argv)
                                     perror("send");
                                 }
                                 // printf("sent %s\n", ak);
+                            } else if(strncmp("bs", buf, 2) == 0) {
+                                if(strcmp(server_payload, "fail") == 0) {
+                                    cse4589_print_and_log("[%s:ERROR]\n", "BLOCK");
+                                    cse4589_print_and_log("[%s:END]\n", "BLOCK");
+                                } else {
+                                    cse4589_print_and_log("[%s:SUCCESS]\n", "BLOCK");
+                                    cse4589_print_and_log("[%s:END]\n", "BLOCK");
+
+                                }
                             }
                         }
 
