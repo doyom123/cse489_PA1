@@ -284,6 +284,9 @@ int main(int argc, char **argv)
                             // BROADCAST
                             if(strncmp("br", buf, 2) == 0) {
                                 // printf("brconfirmed\n");
+                                printf("buf: %s\n", buf);
+                                printf("client_payload: %s\n", client_payload);
+
                                 char *client_ip = strtok(client_payload, " ");
                                 char *msg = strtok(NULL, "");
                                 int msglen = strlen(msg);
@@ -653,7 +656,7 @@ int main(int argc, char **argv)
                
 
 
-                            char payload[256];
+                            char payload[256] = "";
                             char *head = "re";
                             snprintf(payload, sizeof(payload), "%s%s", head, ip_addr);
                             if(send(server_fd, payload, strlen(payload), 0) == -1) {
@@ -663,7 +666,7 @@ int main(int argc, char **argv)
 
                         } else if(strcmp(token, "SEND")  == 0 && logged_in) {
                             // SEND <client-ip> <msg>
-                            char payload[512];
+                            char payload[512] = "";
                             char *head = "se";
                             char *client_ip = strtok(NULL, " ");
                             char *msg = strtok(NULL, "");
@@ -671,7 +674,7 @@ int main(int argc, char **argv)
                             if(msglen > 255) {
                                 msg[255] = 0;
                             }
-                            
+                        
                             // Check if valid ip
                             if(!isValidIP(client_ip) || !inClients(&clients, client_ip)) {
                                 cse4589_print_and_log("[%s:ERROR]\n", "SEND");
@@ -693,14 +696,14 @@ int main(int argc, char **argv)
 
                         } else if(strcmp(token, "BROADCAST") == 0) {
                             // BROADCAST <msg>
-                            char payload[512];
+                            char payload[512] = "";
                             char *head = "br";
                             char *message = strtok(NULL, "");
                             int msglen = strlen(message);
                             if(msglen > 255) {
                                 message[255] = 0;
                             }
-                            // printf("message: %s\n", message);
+                            printf("message: %s\n", message);
 
                             cse4589_print_and_log("[%s:SUCCESS]\n", "BROADCAST");
                             // cse4589_print_and_log(“BROADCAST:%s\n”, ip_addr);
