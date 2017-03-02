@@ -259,7 +259,7 @@ int main(int argc, char **argv)
                         // handle client messages
                         memset(buf, '\0', BUFSIZE);
                         // vec_print_list(&clients);
-                        char payload[BUFSIZE];
+                        char payload[512];
                         int nbytes;
                         if( (nbytes = recv(i, buf, BUFSIZE, 0)) <= 0) {
                             if(nbytes == 0) {
@@ -273,7 +273,7 @@ int main(int argc, char **argv)
                         } else {
                             // printf("received from client: %s\n", buf);
                             int k = 2;
-                            char client_payload[BUFSIZE] = "";
+                            char client_payload[512] = "";
                             // Check command received from client == BROADCAST
                             // printf("**payload: %s\n", client_payload);
                             strncpy(client_payload, &(buf[2]), nbytes-2);
@@ -700,6 +700,7 @@ int main(int argc, char **argv)
                             if(msglen > 255) {
                                 message[255] = 0;
                             }
+                            // printf("message: %s\n", message);
 
                             cse4589_print_and_log("[%s:SUCCESS]\n", "BROADCAST");
                             // cse4589_print_and_log(“BROADCAST:%s\n”, ip_addr);
@@ -814,7 +815,7 @@ int main(int argc, char **argv)
                             // printf("nbytes = %d\n", nbytes);
                             int len = strlen(buf);
                             // printf("recvd %d bytes: %s\n", nbytes, buf);
-                            char server_payload[BUFSIZE] = "";
+                            char server_payload[512] = "";
                             strncpy(server_payload, &(buf[2]), nbytes-2);
                             // char *head = strtok(buf, " ");
                             // char *message = strtok(NULL, "");
