@@ -174,7 +174,7 @@ int main(int argc, char **argv)
         } 
         
         char msg[256];
-        char buf[BUFSIZE];
+        char buf[512];
         int nbytes, new_fd;
         struct sockaddr_in remoteaddr;
         socklen_t addrlen;
@@ -286,6 +286,10 @@ int main(int argc, char **argv)
                                 // printf("brconfirmed\n");
                                 char *client_ip = strtok(client_payload, " ");
                                 char *msg = strtok(NULL, "");
+                                int msglen = strlen(msg);
+                                if(msglen > 255) {
+                                    msg[255] = 0;
+                                }
                                 int client_fd = vec_get_fd(&clients, client_ip);
                                 char *payload;
                                 // printf("clientfd: %d\n", client_fd);
@@ -326,7 +330,10 @@ int main(int argc, char **argv)
                                 char *client_ip = strtok(client_payload, " ");
                                 char *recvr_ip = strtok(NULL, " ");
                                 char *message = strtok(NULL, "");
-                                int len = strlen(message);                   
+                                int len = strlen(message);    
+                                if(len > 255) {
+                                    message[255] = 0;
+                                }               
                                 char *head = "ms";           
                                 // printf("ip: %s\nmessage: %s\n", client_ip, message);
                                 int recvr_fd = vec_get_fd(&clients, recvr_ip);
@@ -339,7 +346,7 @@ int main(int argc, char **argv)
                                         perror("send");
                                     } else {
                                         // printf("sent %d bytes to fd=%d: %s\n", len, recvr_fd, message); 
-                                        cse4589_print_and_log("msg from:%s, to:%s\n[msg]:%s\n",, client_ip, recvr_ip, message);
+                                        cse4589_print_and_log("msg from:%s, to:%s\n[msg]:%s\n", client_ip, recvr_ip, message);
                                         vec_msg_sent(&clients, client_ip);
                                         vec_msg_recv(&clients, recvr_ip);
                                     }
@@ -660,6 +667,10 @@ int main(int argc, char **argv)
                             char *head = "se";
                             char *client_ip = strtok(NULL, " ");
                             char *msg = strtok(NULL, "");
+                            int msglen = strlen(msg);
+                            if(msglen > 255) {
+                                msg[255] = 0;
+                            }
                             
                             // Check if valid ip
                             if(!isValidIP(client_ip) || !inClients(&clients, client_ip)) {
@@ -682,9 +693,13 @@ int main(int argc, char **argv)
 
                         } else if(strcmp(token, "BROADCAST") == 0) {
                             // BROADCAST <msg>
-                            char payload[256];
+                            char payload[512];
                             char *head = "br";
                             char *message = strtok(NULL, "");
+                            int msglen = strlen(message);
+                            if(msglen > 255) {
+                                message[255] = 0;
+                            }
 
                             cse4589_print_and_log("[%s:SUCCESS]\n", "BROADCAST");
                             // cse4589_print_and_log(“BROADCAST:%s\n”, ip_addr);
