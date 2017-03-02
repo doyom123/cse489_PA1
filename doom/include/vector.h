@@ -68,3 +68,4 @@ void vec_set(Vector *vec, int index, Listing l);
 int vec_get_fd(Vector *vec, char *address);
 
 bool inClients(Vector *clients, const char *address);
+bool isBlocked(Vector *vec, const char *sender_ip, const char *recv_ip);

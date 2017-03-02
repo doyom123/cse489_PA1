@@ -49,7 +49,7 @@ int vecstr_find(VectorStr *vs, char *address) {
 
 void vecstr_remove(VectorStr *vs, char *address) {
 	int index = vecstr_find(vs, address);
-	printf("vecstrremove: %d\n", index);
+	// printf("vecstrremove: %d\n", index);
 	if(index != -1) {
 		for(int i = index; i < vs->size-1; i++) {
 			vs->data[i] = vs->data[i + 1];
@@ -204,7 +204,7 @@ void vec_add_msg(Vector *vec, int recvr_fd, char *msg) {
 	}
 
 	if(curr != NULL) {
-		printf("append msg: %s", msg);
+		// printf("append msg: %s", msg);
 		vecstr_append(&(curr->buf_msg), msg);
 	}
 }
@@ -212,7 +212,7 @@ void vec_add_msg(Vector *vec, int recvr_fd, char *msg) {
 // Return 1 if logged-in
 // Return 0 if logged-out
 int vec_status(Vector *vec, int fd) {
-	printf("checking status\n");
+	// printf("checking status\n");
 	Listing  *curr;
 	for(int i = 0; i < vec->size; i++) {
 		curr = vec->data[i];
@@ -345,7 +345,7 @@ void vec_print_statistic(Vector *vec) {
 	cse4589_print_and_log("[%s:SUCCESS]\n", "STATISTICS");
 	for(int i = 0; i < vec->size; i++) {
 		Listing *curr = vec->data[i];
-		cse4589_print_and_log("%-5d%-35s%-8d%-8d%-8s fd:%d\n", i+1, curr->hostname, curr->msg_sent, curr->msg_recv, curr->status, curr->fd);
+		cse4589_print_and_log("%-5d%-35s%-8d%-8d%-8s\n", i+1, curr->hostname, curr->msg_sent, curr->msg_recv, curr->status);
 	}
     cse4589_print_and_log("[%s:END]\n", "STATISTICS");
 }
@@ -364,7 +364,7 @@ int vec_is_blocked(Vector *vec, char *sender_address, int recvr_fd) {
 	if(block_list != NULL) {
 		for(int i = 0; i < block_list->size; i++) {
 			Listing *curr = block_list->data[i];
-			printf("curr->fd: %d   recvr_fd: %d", curr->fd, recvr_fd);
+			// printf("curr->fd: %d   recvr_fd: %d", curr->fd, recvr_fd);
 			if(strcmp(curr->address, sender_address) == 0) {
 				return 1;
 			}
@@ -458,9 +458,9 @@ void vec_login(Vector *vec, char *address) {
 bool inClients(Vector *clients, const char *address) {
 	for(int i = 0; i < clients->size; i++) {
 		Listing *curr = clients->data[i];
-		printf("inClients\n");
-		printf("curr->address: %s\n", curr->address);
-		printf("address: %s\n", address);
+		// printf("inClients\n");
+		// printf("curr->address: %s\n", curr->address);
+		// printf("address: %s\n", address);
 		if(strcmp(curr->address, address) == 0) {
 			return true;
 		}
@@ -468,3 +468,26 @@ bool inClients(Vector *clients, const char *address) {
 	return false;
 }
 
+// Return true if blocked
+// return false if not blocked
+bool isBlocked(Vector *vec, const char *sender_ip, const char *recv_ip) {
+	Vector *block_list = NULL;
+
+	for(int i = 0; i < vec->size; i++) {
+		Listing *curr = vec->data[i];
+		if(strcmp(sender_ip, curr->address) == 0) {
+			block_list = curr->blocked;
+			break;
+		}
+	}
+	if(block_list != NULL) {
+		for(int i = 0; i < block_list->size; i++) {
+			Listing *curr = block_list->data[i];
+			// printf("curr->fd: %d   recvr_fd: %d", curr->fd, recvr_fd);
+			if(strcmp(curr->address, recv_ip) == 0) {
+				return true;
+			}
+		}
+	}
+	return false;
+}

@@ -298,22 +298,22 @@ int main(int argc, char **argv)
                                 snprintf(to_client, sizeof(to_client), "%s%s %s", head, client_ip, msg);
                                 char buf_msg[512] = "";
                                 vecstr_append(&msg_buffer, to_client);
+                                vec_msg_sent(&clients, client_ip);
                                 for(int j = 4; j <= fd_max; j++) {
                                     // if(FD_ISSET(j, &master)) {
-                                        printf("j: %d\n", j);
+                                        // printf("j: %d\n", j);
                                         // if recvr is not blocked and logged in
                                         if(j != fd && j != client_fd && vec_is_blocked(&clients, client_ip, j) != 1 && vec_status(&clients, j) == 1) {
                                             if(send(j, to_client, strlen(to_client), 0) == -1) {
                                                 perror("send");
                                             } else {
-                                                vec_msg_sent(&clients, client_ip);
                                                 vec_msg_recv_fd(&clients, j);
-                                                printf("fd: %d\nmsg: %s\n", j, msg);
+                                                // printf("fd: %d\nmsg: %s\n", j, msg);
                                             }
                                             
                                         } else if(j != fd && j != client_fd && vec_is_blocked(&clients, client_ip, j) != 1 && vec_status(&clients, j) == 0) {
                                             // If client is not blocked and logged out, add msg to client msg buffer
-                                            printf("add msg to buffer for fd: %d msg: %s\n", j, to_client);
+                                            // printf("add msg to buffer for fd: %d msg: %s\n", j, to_client);
                                             vec_add_msg(&clients, j, to_client);
 
                                         }
@@ -347,6 +347,8 @@ int main(int argc, char **argv)
                                     // if recvr exists and is not blocked and is not logged in
                                     // then save to recvr's msg buffer
                                     vec_add_msg(&clients, recvr_fd, to_client);
+                                    vec_msg_sent(&clients, client_ip);
+
                                 }
                             } 
                             // After login, receive and assign client listening port
@@ -388,30 +390,32 @@ int main(int argc, char **argv)
 
                                 if(result == -1) {
                                     // #TODO: send all buffered msgs to client
-                                    printf("result == -1 send all buffered msgs\n");
+                                    // printf("result == -1 send all buffered msgs\n");
                                     for(int i = 0; i < msg_buffer.size; i++) {
                                         if(send(new_fd, msg_buffer.data[i], strlen(msg_buffer.data[i]), 0) == -1) {
                                             perror("send");
                                         }
-                                        printf("sent: %s\n", msg_buffer.data[i]);
+                                        vec_msg_recv_fd(&clients, new_fd);
+                                        // printf("sent: %s\n", msg_buffer.data[i]);
                                         char msg_ak[10];
                                         recv(new_fd, msg_ak, sizeof(msg_ak), 0);
-                                        printf("received ak: %s\n", msg_ak);
+                                        // printf("received ak: %s\n", msg_ak);
                                     }
                                 } else {
                                     // #TODO: print out from client buf messages
-                                    printf("result != -1 print out from client buf msgs\n");
+                                    // printf("result != -1 print out from client buf msgs\n");
                                     VectorStr vs = clients.data[result]->buf_msg;
-                                    printf("vs.size: %d", vs.size);
-                                    printf("entering for loop\n");
+                                    // printf("vs.size: %d", vs.size);
+                                    // printf("entering for loop\n");
                                     for(int i = 0; i < vs.size; i++) {
                                         if(send(new_fd, vs.data[i], strlen(vs.data[i]), 0) == -1) {
                                             perror("send");
                                         }
-                                        printf("sent: %s\n", vs.data[i]);
+                                        vec_msg_recv_fd(&clients, new_fd);
+                                        // printf("sent: %s\n", vs.data[i]);
                                         char msg_ak[10];
                                         recv(new_fd, msg_ak, sizeof(msg_ak), 0);
-                                        printf("received ak: %s\n", msg_ak);
+                                        // printf("received ak: %s\n", msg_ak);
                                     }
                                     for(int i = 0; i < vs.size; i++) {
                                         free(vs.data[i]);
@@ -569,14 +573,6 @@ int main(int argc, char **argv)
                             // LOGIN <server-ip> <server-port>
                             char *server_ip  = strtok(NULL, " ");
                             char *server_port = strtok(NULL, " ");
-                            // if(server_fd != -1) {
-                            //     logged_in == true;
-                            //     char payload[256] = "";
-                            //     char *head = "rl";
-                            //     snprintf(payload, sizeof(payload), "%s%s", head, ip_addr);
-                            //     send(server_fd, payload, strlen(payload), 0);
-                            //     break;
-                            // }
                             // printf("sip: %s\n", server_ip);
                             if(!isValidIP(server_ip)) {
                                 cse4589_print_and_log("[%s:ERROR]\n", "LOGIN");
@@ -687,8 +683,8 @@ int main(int argc, char **argv)
                             char payload[256] = "";
                             char *head = "bl";
                             if(!isValidIP(client_ip) || !inClients(&clients, client_ip)) {
-                                cse4589_print_and_log("[%s:ERROR]\n", "SEND");
-                                cse4589_print_and_log("[%s:END]\n", "SEND");
+                                cse4589_print_and_log("[%s:ERROR]\n", "BLOCK");
+                                cse4589_print_and_log("[%s:END]\n", "BLOCK");
                             } else {
                                 snprintf(payload, sizeof(payload), "%s%s %s", head, ip_addr, client_ip);
                                 if(send(server_fd, payload, strlen(payload), 0) == -1) {
@@ -707,9 +703,9 @@ int main(int argc, char **argv)
                             char *client_ip = strtok(NULL, " ");
                             char payload[256] = "";
                             char *head = "ub";
-                            if(!isValidIP(client_ip) || !inClients(&clients, client_ip)) {
-                                cse4589_print_and_log("[%s:ERROR]\n", "SEND");
-                                cse4589_print_and_log("[%s:END]\n", "SEND");
+                            if(!isValidIP(client_ip) || !inClients(&clients, client_ip) || isBlocked(&clients, ip_addr, client_ip)) {
+                                cse4589_print_and_log("[%s:ERROR]\n", "UNBLOCK");
+                                cse4589_print_and_log("[%s:END]\n", "UNBLOCK");
                             } else {
                                 snprintf(payload, sizeof(payload), "%s%s %s", head, ip_addr, client_ip);
                                 if(send(server_fd, payload, strlen(payload), 0) == -1) {
@@ -732,7 +728,7 @@ int main(int argc, char **argv)
                             if(close(server_fd) == -1) {
                                 perror("close");
                             }
-                            printf("cleared server_fd %d\n", server_fd);
+                            // printf("cleared server_fd %d\n", server_fd);
                             FD_CLR(server_fd, &master);
                             server_fd = -1;
 
