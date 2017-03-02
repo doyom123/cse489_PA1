@@ -299,7 +299,7 @@ int main(int argc, char **argv)
                                 char buf_msg[512] = "";
                                 vecstr_append(&msg_buffer, to_client);
                                 for(int j = 1; j <= fd_max; j++) {
-                                    if(FD_ISSET(j, &master)) {
+                                    // if(FD_ISSET(j, &master)) {
                                         printf("j: %d\n", j);
                                         // if recvr is not blocked and not logged out
                                         if(j != fd && j != client_fd && vec_is_blocked(&clients, client_ip, j) != 1 && vec_status(&clients, j) == 1) {
@@ -317,7 +317,7 @@ int main(int argc, char **argv)
                                             vec_add_msg(&clients, j, msg);
 
                                         }
-                                    }
+                                    // }
                                 }
                                 // vecstr_print(&msg_buffer);
                             }
@@ -564,14 +564,14 @@ int main(int argc, char **argv)
                             // LOGIN <server-ip> <server-port>
                             char *server_ip  = strtok(NULL, " ");
                             char *server_port = strtok(NULL, " ");
-                            if(server_fd != -1) {
-                                logged_in == true;
-                                char payload[256] = "";
-                                char *head = "rl";
-                                snprintf(payload, sizeof(payload), "%s%s", head, ip_addr);
-                                send(server_fd, payload, strlen(payload), 0);
-                                break;
-                            }
+                            // if(server_fd != -1) {
+                            //     logged_in == true;
+                            //     char payload[256] = "";
+                            //     char *head = "rl";
+                            //     snprintf(payload, sizeof(payload), "%s%s", head, ip_addr);
+                            //     send(server_fd, payload, strlen(payload), 0);
+                            //     break;
+                            // }
                             // printf("sip: %s\n", server_ip);
                             if(!isValidIP(server_ip)) {
                                 cse4589_print_and_log("[%s:ERROR]\n", "LOGIN");
@@ -724,12 +724,12 @@ int main(int argc, char **argv)
                                 perror("send");
                             }
 
-                            // if(close(server_fd) == -1) {
-                            //     perror("close");
-                            // }
-                            // printf("cleared server_fd %d\n", server_fd);
-                            // FD_CLR(server_fd, &master);
-                            // server_fd = -1;
+                            if(close(server_fd) == -1) {
+                                perror("close");
+                            }
+                            printf("cleared server_fd %d\n", server_fd);
+                            FD_CLR(server_fd, &master);
+                            server_fd = -1;
 
                             logged_in = false;
 
