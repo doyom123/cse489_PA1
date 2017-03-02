@@ -458,6 +458,9 @@ void vec_login(Vector *vec, char *address) {
 bool inClients(Vector *clients, const char *address) {
 	for(int i = 0; i < clients->size; i++) {
 		Listing *curr = clients->data[i];
+		printf("inClients\n");
+		printf("curr->address: %s\n", curr->address);
+		printf("address: %s\n", address);
 		if(strcmp(curr->address, address)) {
 			return true;
 		}

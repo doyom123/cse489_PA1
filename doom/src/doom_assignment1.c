@@ -822,9 +822,8 @@ int main(int argc, char **argv)
                                 char *msg = strtok(NULL, "");
                                 // printf("pay: %s\nip: %s\nmsg:%s\n", buf, ip, msg);
                                 cse4589_print_and_log("[%s:SUCCESS]\n", "RECEIVED");
-
                                 cse4589_print_and_log("msg from:%s\n[msg]:%s\n", ip, msg);
-                                cse4589_print_and_log("[%s:END]", "RECEIVED");
+                                cse4589_print_and_log("[%s:END]\n", "RECEIVED");
 
                                 char *ak = "ak";
                                 if(send(server_fd, ak, sizeof(ak),0) == -1) {
