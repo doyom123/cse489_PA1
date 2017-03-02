@@ -461,7 +461,7 @@ bool inClients(Vector *clients, const char *address) {
 		printf("inClients\n");
 		printf("curr->address: %s\n", curr->address);
 		printf("address: %s\n", address);
-		if(strcmp(curr->address, address)) {
+		if(strcmp(curr->address, address) == 0) {
 			return true;
 		}
 	}
