@@ -697,8 +697,6 @@ int main(int argc, char **argv)
 
                         } else if(strcmp(token, "UNBLOCK") == 0) {
                             // UNBLOCK <client-ip>
-                            cse4589_print_and_log("[%s:SUCCESS]\n", "UNBLOCK");
-                            cse4589_print_and_log("[%s:END]\n", "UNBLOCK");
 
                             char *client_ip = strtok(NULL, " ");
                             char payload[256] = "";
@@ -711,6 +709,8 @@ int main(int argc, char **argv)
                                 if(send(server_fd, payload, strlen(payload), 0) == -1) {
                                     perror("send");
                                 }
+                                cse4589_print_and_log("[%s:SUCCESS]\n", "UNBLOCK");
+                                cse4589_print_and_log("[%s:END]\n", "UNBLOCK");
                                 // printf("unblock: %s\n", payload);
                             }
 

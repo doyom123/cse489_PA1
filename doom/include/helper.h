@@ -15,8 +15,5 @@ bool isValidInt(const char *input);
 bool isValidIP(const char *address);
 int sendall(int s, char *buf, int *len);
 int recvall(int s, char *buf, int *len);
-void printStats();
-char** splitString();
-// char* ip_string(const struct sockaddr *sa,  char *dst, size_t size);
 
 #endif

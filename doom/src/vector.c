@@ -33,7 +33,7 @@ void vecstr_append(VectorStr *vs, char *address) {
 	vs->data[vs->size] = temp;
 	// strcpy(vs->data[vs->size], address);
 	vs->size++;
-	vecstr_print(vs);
+	// vecstr_print(vs);
 }
 
 int vecstr_find(VectorStr *vs, char *address) {
