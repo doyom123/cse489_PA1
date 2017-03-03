@@ -349,7 +349,10 @@ int main(int argc, char **argv)
                                         perror("send");
                                     } else {
                                         // printf("sent %d bytes to fd=%d: %s\n", len, recvr_fd, message); 
+                                        
+					cse4589_print_and_log("[%s:SUCCESS]\n", "RELAYED");
                                         cse4589_print_and_log("msg from:%s, to:%s\n[msg]:%s\n", client_ip, recvr_ip, message);
+					cse4589_print_and_log("[%s:END]\n", "RELAYED");
                                         vec_msg_sent(&clients, client_ip);
                                         vec_msg_recv(&clients, recvr_ip);
                                     }
@@ -402,9 +405,13 @@ int main(int argc, char **argv)
                                     // #TODO: send all buffered msgs to client
                                     // printf("result == -1 send all buffered msgs\n");
                                     for(int i = 0; i < msg_buffer.size; i++) {
+					
+					cse4589_print_and_log("[%s:SUCCESS]\n", "RELAYED");
+                                        cse4589_print_and_log("msg from:%s, to:%s\n[msg]:%s\n", client_ip, recvr_ip, message);
                                         if(send(new_fd, msg_buffer.data[i], strlen(msg_buffer.data[i]), 0) == -1) {
                                             perror("send");
                                         }
+					cse4589_print_and_log("[%s:END]\n", "RELAYED");
                                         vec_msg_recv_fd(&clients, new_fd);
                                         // printf("sent: %s\n", msg_buffer.data[i]);
                                         char msg_ak[10];
