@@ -433,6 +433,16 @@ int vec_get_fd(Vector *vec, char *address) {
 	return result;
 }
 
+int vec_get_port(Vector *vec, char *address) {
+	int result = -1;
+	for(int i = 0; i < vec->size; i++) {
+	    if(strcmp(vec->data[i]->address, address) == 0) {
+	        result = vec->data[i]->port;
+		break;
+	    }
+	}
+	return result;
+}
 void vec_logout(Vector *vec, char *address) {
 	for(int i = 0; i < vec->size; i++) {
 		if(strcmp(vec->data[i]->address, address) == 0) {

@@ -66,6 +66,7 @@ int vec_insert_sorted(Vector *vec, Listing *l);
 Listing vec_get(Vector *vec, int index);
 void vec_set(Vector *vec, int index, Listing l);
 int vec_get_fd(Vector *vec, char *address);
+int vec_get_port(Vector *vec, char *address);
 
 bool inClients(Vector *clients, const char *address);
 bool isBlocked(Vector *vec, const char *sender_ip, const char *recv_ip);

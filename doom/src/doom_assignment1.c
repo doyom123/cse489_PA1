@@ -32,7 +32,9 @@
 #include <arpa/inet.h>
 #include <netinet/in.h>
 #include <limits.h>
-
+#include <sys/stat.h>
+#include <sys/sendfile.h>
+#include <fcntl.h>
 #include "../include/global.h"
 #include "../include/logger.h"
 #include "../include/helper.h"
@@ -405,9 +407,14 @@ int main(int argc, char **argv)
                                     // #TODO: send all buffered msgs to client
                                     // printf("result == -1 send all buffered msgs\n");
                                     for(int i = 0; i < msg_buffer.size; i++) {
-					
+				    	int len = strlen(msg_buffer.data[i]);
+					char sender_ip[INET_ADDRSTRLEN] = "";
+					char temp[512] = "";
+					char msg_to[512] = "";
+				    	strncpy(temp, &(msg_buffer.data[i][2]), len-2);
+					sscanf(temp, "%s %[^\n]", sender_ip, msg_to);
 					cse4589_print_and_log("[%s:SUCCESS]\n", "RELAYED");
-                                        cse4589_print_and_log("msg from:%s, to:%s\n[msg]:%s\n", client_ip, recvr_ip, message);
+                                        cse4589_print_and_log("msg from:%s, to:%s\n[msg]:%s\n", sender_ip, ip, msg_to);
                                         if(send(new_fd, msg_buffer.data[i], strlen(msg_buffer.data[i]), 0) == -1) {
                                             perror("send");
                                         }
@@ -425,9 +432,18 @@ int main(int argc, char **argv)
                                     // printf("vs.size: %d", vs.size);
                                     // printf("entering for loop\n");
                                     for(int i = 0; i < vs.size; i++) {
-                                        if(send(new_fd, vs.data[i], strlen(vs.data[i]), 0) == -1) {
+				    	int len = strlen(vs.data[i]);
+					char sender_ip[INET_ADDRSTRLEN] = "";
+					char temp[512] = "";
+					char msg_to[512] = "";
+				    	strncpy(temp, &(vs.data[i][2]), len-2);
+					sscanf(temp, "%s %[^\n]", sender_ip, msg_to);
+					cse4589_print_and_log("[%s:SUCCESS]\n", "RELAYED");
+                                        cse4589_print_and_log("msg from:%s, to:%s\n[msg]:%s\n", sender_ip, ip, msg_to);
+					if(send(new_fd, vs.data[i], strlen(vs.data[i]), 0) == -1) {
                                             perror("send");
                                         }
+					cse4589_print_and_log("[%s:END]\n", "RELAYED");
                                         vec_msg_recv_fd(&clients, new_fd);
                                         // printf("sent: %s\n", vs.data[i]);
                                         char msg_ak[10];
@@ -519,19 +535,14 @@ int main(int argc, char **argv)
                             if(strncmp("rl",buf, 2) == 0) {
                                 vec_login(&clients, client_payload);
                             }
-
                         }
-
                     }
                 }
-
             }
         }   // end for
         vec_free(&clients);
         vecstr_free(&msg_buffer);
-
     }
-
 
 
     // Client Code
@@ -540,6 +551,7 @@ int main(int argc, char **argv)
         bool logged_in = false;
         Vector clients;
         vec_init(&clients);
+	int sf_fd = -1;
 
         if(listen(fd, BACKLOG) != 0) {
             perror("listen");
@@ -552,6 +564,7 @@ int main(int argc, char **argv)
         struct sockaddr_storage remoteaddr;
         socklen_t addrlen;
         int server_fd = -1;
+	int file_fd = -1;
 
         FD_SET(0, &master);
         FD_SET(fd, &master);
@@ -567,7 +580,7 @@ int main(int argc, char **argv)
                 exit(EXIT_FAILURE);
             }
             for(int i = 0; i <= fd_max; i++) {
-                if(FD_ISSET(i, &read_fds)) {
+                if(i != file_fd && FD_ISSET(i, &read_fds)) {
                     if(i == STDIN) {
                         status = read(0, buf, sizeof(buf));
                         if(status == -1) {
@@ -800,16 +813,75 @@ int main(int argc, char **argv)
                             exit(0);
                         } else if(strcmp(token, "SENDFILE") == 0) {
                             // SENDFILE <client-ip> <file>
+			    struct stat file_stat;
+
                             cse4589_print_and_log("[%s:SUCCESS]\n", "SENDFILE");
                             cse4589_print_and_log("[%s:END]\n", "SENDFILE");
+                            char *head = "sf";
+			    char *recvr_ip = strtok(NULL, " ");
+			    int recvr_port = vec_get_port(&clients, recvr_ip);
+			    char *filename = strtok(NULL, "");
+			    // Get file size of file
+			    stat(filename, &file_stat);
 
+			    if((file_fd = open(filename, O_RDONLY)) == -1) {
+			        perror("open");
+			    }
+                            char payload[256] = "";
+			    
+			    // Connect to recvr
+			    struct sockaddr_in recvr_addr;
+			    int recvr_fd;
+			    if((recvr_fd = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
+			    	perror("LOGIN socket");
+				exit(EXIT_FAILURE);
+			    }
+			    bzero(&recvr_addr, sizeof(recvr_addr));
+			    recvr_addr.sin_family = AF_INET;
+			    inet_pton(AF_INET, recvr_ip, &recvr_addr.sin_addr);
+			    recvr_addr.sin_port = htons(recvr_port);
+			    memset(&hints, 0, sizeof(struct addrinfo));
 
-                            char *client_ip = strtok(NULL, " ");
-                            char *file = strtok(NULL, " ");
+			    if(connect(recvr_fd, (struct sockaddr*)&recvr_addr, sizeof(recvr_addr)) == -1) {
+			    	printf("connect error\n");
+			    }
+
+			    FD_SET(recvr_fd, &master);
+			    if(recvr_fd > fd_max) fd_max = recvr_fd;
+
+			    // Send header and size of file to recvr
+			    char ak_payload[256] = "";
+			    snprintf(ak_payload, sizeof(ak_payload), "%s%s %s %lu", head, ip_addr, filename, (unsigned int)file_stat.st_size);
+			    send(recvr_fd, ak_payload, strlen(ak_payload), 0);
+                                                                                                     
+
+			    // Wait for acknowledgement from recvr
+			    char ak[10] = "";
+			    if(recv(recvr_fd, ak, sizeof(ak), 0) == -1) {
+			    	perror("recv");
+			    }
+
+			    // Send file
+			    off_t offset = 0;
+			    if(sendfile(recvr_fd, file_fd, &offset, file_stat.st_size) == -1) {
+                                perror("sendfile");
+			    }
+
+                            // Close file and connection
+			    //close(file_fd);
+			    //close(recvr_fd);
+
                         }
                     } else if(i == fd) {
                         // handle new connections
-
+                        addrlen = sizeof(remoteaddr);
+			sf_fd = accept(fd, (struct sockaddr *)&remoteaddr, &addrlen);
+			if(sf_fd == -1) {
+			    perror("accept");
+			} else {
+			    FD_SET(sf_fd, &master);
+			    if(sf_fd > fd_max) fd_max = sf_fd;
+			}
                     } else {
                         // handle incoming messages
                         if( (nbytes = recv(i, buf, sizeof(buf), 0)) <= 0) {
@@ -894,9 +966,40 @@ int main(int argc, char **argv)
                                     cse4589_print_and_log("[%s:END]\n", "UNBLOCK");
 
                                 }
-                            }
-                        }
+                            } else if(strncmp("sf", buf, 2) == 0) {
+			    	char *errcheck;
+				char *sender_ip = strtok(server_payload, " ");
+			    	char *filename = strtok(NULL, " ");
+				char *file_size_str = strtok(NULL, "");
+				int file_size = strtol(file_size_str, &errcheck, 10);
+				char *ak = "ak";
 
+				//printf("filename: %s\nsender_ip: %s\nsf_fd: %d\nfile_size: %lu\n", filename, sender_ip, sf_fd, file_size);
+				if(send(sf_fd, ak, sizeof(ak), 0) == -1) {
+				    perror("send");
+				}
+				char file_path[128] = "";
+			        snprintf(file_path, sizeof(file_path), "%s%s", "aa", filename);
+				FILE *file = fopen(filename, "wb");
+			        char *file_buf = malloc(file_size);
+				unsigned long bytes_recvd = 0;
+				int nbytes = 0;
+				/*while((nbytes = recv(sf_fd, file_buf, sizeof(file_buf), 0)) != 0) {
+                                     printf("nbytes: %d\n", nbytes);
+				}*/
+				while(bytes_recvd < file_size) {
+				    int nbytes = 0;
+			            memset(file_buf, 0, sizeof(file_buf));
+				    nbytes = recv(sf_fd, file_buf, sizeof(file_buf), 0); 
+				    bytes_recvd += nbytes;
+				    //printf("filebuf: %s\n,", file_buf);
+                                    fwrite(file_buf, sizeof(char), nbytes, file);
+				    //printf("wrote %d bytes to file\n", nbytes);
+                                }
+                                fclose(file);
+				free(file_buf);
+			    }
+                        }
                     }
                 }
             }
