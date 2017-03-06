@@ -298,9 +298,6 @@ int main(int argc, char **argv)
                                 int client_fd = vec_get_fd(&clients, client_ip);
                                 char *payload;
                                 // printf("clientfd: %d\n", client_fd);
-                                cse4589_print_and_log("[%s:SUCCESS]\n", "RELAYED");
-                                cse4589_print_and_log("msg from:%s, to:%s\n[msg]:%s\n", client_ip, "255.255.255.255", msg);
-                                cse4589_print_and_log("[%s:END]\n", "RELAYED");
 
                                 char to_client[512] = "";
                                 char *head = "ms";
@@ -316,6 +313,9 @@ int main(int argc, char **argv)
                                             if(send(j, to_client, strlen(to_client), 0) == -1) {
                                                 perror("send");
                                             } else {
+						cse4589_print_and_log("[%s:SUCCESS]\n", "RELAYED");
+						cse4589_print_and_log("msg from:%s, to:%s\n[msg]:%s\n", client_ip, "255.255.255.255", msg);
+						cse4589_print_and_log("[%s:END]\n", "RELAYED");
                                                 vec_msg_recv_fd(&clients, j);
                                                 // printf("fd: %d\nmsg: %s\n", j, msg);
                                             }
@@ -393,15 +393,6 @@ int main(int argc, char **argv)
                                 int result = vec_insert_sorted(&clients, listing);
 
                                 // Send client list
-                                char c_payload[2056] = "";
-                                char head[3] = "li";
-                                char client_list[2056] = "";
-                                vec_clients(&clients, client_list);
-                                snprintf(c_payload, sizeof(c_payload),"%s%s", head, client_list);
-                                // printf("c_payload:\n%s\n", c_payload);
-                                if(send(new_fd, c_payload, strlen(c_payload), 0) == -1) {
-                                    perror("send");
-                                }
 
                                 if(result == -1) {
                                     // #TODO: send all buffered msgs to client
@@ -454,8 +445,16 @@ int main(int argc, char **argv)
                                         free(vs.data[i]);
                                     }
                                     vs.size = 0;
-
-
+                                }
+				// Send client list
+                                char c_payload[2056] = "";
+                                char head[3] = "li";
+                                char client_list[2056] = "";
+                                vec_clients(&clients, client_list);
+                                snprintf(c_payload, sizeof(c_payload),"%s%s", head, client_list);
+                                // printf("c_payload:\n%s\n", c_payload);
+                                if(send(new_fd, c_payload, strlen(c_payload), 0) == -1) {
+                                    perror("send");
                                 }
                             }
 
@@ -714,7 +713,7 @@ int main(int argc, char **argv)
                             }
 
 
-                        } else if(strcmp(token, "BROADCAST") == 0) {
+                        } else if(strcmp(token, "BROADCAST") == 0 && logged_in) {
                             // BROADCAST <msg>
                             char payload[512] = "";
                             char *head = "br";
@@ -725,17 +724,18 @@ int main(int argc, char **argv)
                             }
                             // printf("message: %s\n", message);
 
-                            cse4589_print_and_log("[%s:SUCCESS]\n", "BROADCAST");
                             // cse4589_print_and_log(“BROADCAST:%s\n”, ip_addr);
                             // cse4589_print_and_log("%s\n", message);
-                            cse4589_print_and_log("[%s:END]\n", "BROADCAST");
 
                             snprintf(payload, sizeof(payload), "%s%s %s", head, ip_addr, message);
                             if(server_fd != -1) {
                                 // Send to server
                                 if(send(server_fd, payload, sizeof(payload), 0) == -1) {
                                     perror("send");
-                                }
+                                } else {
+				    cse4589_print_and_log("[%s:SUCCESS]\n", "BROADCAST");
+				    cse4589_print_and_log("[%s:END]\n", "BROADCAST");
+				}
                                 // write(1, message, len);
 
                             }
@@ -851,7 +851,7 @@ int main(int argc, char **argv)
 
 			    // Send header and size of file to recvr
 			    char ak_payload[256] = "";
-			    snprintf(ak_payload, sizeof(ak_payload), "%s%s %s %lu", head, ip_addr, filename, (unsigned int)file_stat.st_size);
+			    snprintf(ak_payload, sizeof(ak_payload), "%s%s %s %lu", head, ip_addr, filename, (long unsigned int)file_stat.st_size);
 			    send(recvr_fd, ak_payload, strlen(ak_payload), 0);
                                                                                                      
 
