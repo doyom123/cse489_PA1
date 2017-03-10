@@ -1,4 +1,4 @@
-// https://www.happybearsoftware.com/implementing-a-dynamic-array
+// format from https://www.happybearsoftware.com/implementing-a-dynamic-array
 #include <limits.h>
 #include "helper.h"
 #define INITIAL_CAPACITY 10
